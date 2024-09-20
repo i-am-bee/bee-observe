@@ -1,0 +1,28 @@
+name: 'bee-observe'
+services:
+  observe_api:
+    build:
+      context: .
+      args:
+        GIT_TAG: ${TAG:-testing}
+        BUILD_DATETIME: ${BUILD_DATETIME:-}
+    ports:
+      - '${OBSERVE_API_EXPOSED_PORT:-4002}:3000'
+    env_file:
+      - .env.testing
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://0.0.0.0:3000/health || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  wait_for_api:
+    image: curlimages/curl:latest
+    depends_on:
+      observe_api:
+        condition: service_healthy
+    entrypoint:
+      [
+        'sh',
+        '-c',
+        "while ! curl --silent --fail http://observe_api:3000/health; do echo 'Waiting for API...'; sleep 5; done"
+      ]

@@ -1,0 +1,27 @@
+.vscode
+.nvmrc
+README.md
+.editorconfig
+.dockerignore
+compose.yml
+dist
+tmp
+temp
+.git*
+Dockerfile
+coverage
+.husky
+.env.testing
+.env
+.travis.yml
+scripts
+mlruns-default-experiment
+
+## https://yarnpkg.com/getting-started/qa#which-files-should-be-gitignored
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+node_modules
