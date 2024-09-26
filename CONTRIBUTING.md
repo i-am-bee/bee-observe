@@ -7,7 +7,7 @@ This page describes how you can join the Bee community in this goal.
 
 If you are new to Bee contributing, we recommend you do the following before diving into the code:
 
-- Read [Bee Overview](./docs/overview.md) to understand core concepts.
+- Read [Bee Overview](./docs/overview.md) and [Technical Overview](./docs/technical-overview.md) to understand core concepts.
 - Read [Code of Conduct](./CODE_OF_CONDUCT.md).
 
 ## Choose an issue to work on

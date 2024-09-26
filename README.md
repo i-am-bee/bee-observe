@@ -157,5 +157,6 @@ All content in these repositories including code has been provided by IBM under 
 Read all related document pages carefully to understand the Observer API architecture and limitations.
 
 - [Overview](./docs/overview.md)
+- [Technical overview](./docs/technical-overview.md)
 - [API](./docs/api.md)
 - [Data persistence](./docs/data-persistence.md)
