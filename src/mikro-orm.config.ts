@@ -49,7 +49,7 @@ const config: Options = {
   driver: MongoDriver,
   // folder-based discovery setup, using common filename suffix
   entities: ['./dist/**/*.document.js'],
-  entitiesTs: ['./src/**/*.document.ts'],
+  entitiesTs: process.env.NODE_ENV !== 'production' ? ['./src/**/*.document.ts'] : [],
 
   /**
    * We are having some ECONNRESET errors on the DIPC cluster. Seems like problem with f5 load balancer.
@@ -81,7 +81,12 @@ const config: Options = {
   driverOptions: {
     ...createMongoTLSConfig()
   },
-  dynamicImportProvider: (id) => import(id)
+  dynamicImportProvider: (id) => {
+    if (process.env.NODE_ENV === 'production') {
+      return import(id.replace(/\.ts$/, '.js')); // Ensure it loads `.js` files in production
+    }
+    return import(id); // Otherwise, load `.ts` files during development
+  }
 };
 
 export default config;

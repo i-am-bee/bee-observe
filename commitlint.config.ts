@@ -6,7 +6,11 @@ const Configuration: UserConfig = {
     function ignoreDependabot(commit: string) {
       return commit.includes('<support@github.com>') && commit.includes('dependabot');
     }
-  ]
+  ],
+  // Add rules here
+  rules: {
+    'signed-off-by': [2, 'always', 'Signed-off-by']
+  }
 };
 
 export default Configuration;

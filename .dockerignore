@@ -16,6 +16,13 @@ coverage
 .travis.yml
 scripts
 mlruns-default-experiment
+vitest.config.ts
+docs
+commitlint.config.ts
+CONTRIBUTING.md
+CODE_OF_CONDUCT.md
+CHANGELOG.md
+compose-before.yml
 
 ## https://yarnpkg.com/getting-started/qa#which-files-should-be-gitignored
 .yarn/*

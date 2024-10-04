@@ -26,17 +26,21 @@ RUN yarn install
 # Build the application
 RUN yarn build
 
+# install production dependencies
+ENV NODE_ENV=production
+RUN yarn workspaces focus --production && rm -rf "$(yarn cache clean)"
+
 #### Runtime stage
 FROM base AS runtime
-COPY --chown=node:node --from=builder ${APP_DIR} ./
+COPY --chown=node:node --from=builder ${APP_DIR}/dist ./dist
+COPY --chown=node:node --from=builder ${APP_DIR}/node_modules ./node_modules
+COPY --chown=node:node --from=builder ${APP_DIR}/package.json ./package.json
+COPY --chown=node:node --from=builder ${APP_DIR}/.env.example ./.env.example
+COPY --chown=node:node --from=builder ${APP_DIR}/yarn.lock ./yarn.lock
 
 # 1. make group root (which has id 0) owner of the directory
 # 2. add write permissions for the group to the directory
 RUN chown -R 1001:0 ${APP_DIR} &&\
   chmod -R g+w ${APP_DIR}
-
-ENV NODE_ENV=production
-## RUN yarn install --immutable
-RUN yarn workspaces focus --production && rm -rf "$(yarn cache clean)"
 
 CMD ["node", "./dist/index.js"]

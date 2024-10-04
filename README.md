@@ -33,6 +33,7 @@
 > The running Observe instance uses the `Redis`, `MongoDB` and `Mlflow` services. See `./compose-before.yml` for more info on how to run them.
 
 1. create .env.docker file
+
    > Use the `BASE_AUTH` authorization strategy in the production. See `MLFLOW_AUTHORIZATION` env variable.
 
    > Use TLS certificate for MongoDB and Redis. See `MONGODB_CA_CERT` and `REDIS_CA_CERT` env variables.
