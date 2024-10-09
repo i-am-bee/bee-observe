@@ -66,7 +66,7 @@ const config: Options = {
 
   extensions: [Migrator],
   migrations: {
-     // Point to the right folder based on the environment
+    // Point to the right folder based on the environment
     path: process.env.NODE_ENV === 'production' ? './dist/migrations' : './src/migrations',
     // The `true` value Does not work for replicasets as well. It throw an error: `Cannot create namespace bee-observe.mikro_orm_migrations in multi-document transaction.`
     transactional: false
