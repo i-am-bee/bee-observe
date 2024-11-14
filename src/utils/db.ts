@@ -101,6 +101,7 @@ export async function createTTLIndexes({ expireAfterSeconds }: { expireAfterSeco
   const db = ORM.em.getDriver().getConnection().getDb();
   await createTTLIndexSafe({ em: ORM.span, expireAfterSeconds, db });
   await createTTLIndexSafe({ em: ORM.trace, expireAfterSeconds, db });
+  await createTTLIndexSafe({ em: ORM.mlflowtrace, expireAfterSeconds, db });
 }
 
 async function createTTLIndexSafe<T extends BaseDocument>({
