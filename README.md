@@ -22,11 +22,12 @@
    - [Running the server via Docker](#running-the-server-via-docker)
    - [Running the Server via Node.js](#running-the-server-via-nodejs)
    - [Development Mode](#development-mode)
-4. [🧪 Run tests](#-run-tests)
-5. [📣 Publishing](#-publishing)
-6. [Code of conduct](#code-of-conduct)
-7. [Legal notice](#legal-notice)
-8. [📖 Docs](#-docs)
+4. [🪑 Setup with OpenTelemetry](#-setup-with-opentelemetry)
+5. [🧪 Run tests](#-run-tests)
+6. [📣 Publishing](#-publishing)
+7. [Code of conduct](#code-of-conduct)
+8. [Legal notice](#legal-notice)
+9. [📖 Docs](#-docs)
 
 ## 👩‍💻 Get started with Observe
 
@@ -131,6 +132,10 @@ For development mode with hot-reloading, use:
 yarn dev
 ```
 
+### 🪑 Setup with OpenTelemetry
+
+See the [Using Bee Observe OTLP Backend with OpenTelemetry](./docs/using-with-opentelemetry.md) section for instructions on how to use the Observe backend with the OpenTelemetry stack.
+
 ### 🧪 Run tests
 
 > This project uses integration API tests that require a running observe instance to be executed.
@@ -160,3 +165,4 @@ Read all related document pages carefully to understand the Observer API archite
 - [Overview](./docs/overview.md)
 - [API](./docs/api.md)
 - [Data persistence](./docs/data-persistence.md)
+- [Using Bee Observe OTLP Backend with OpenTelemetry](./docs/using-with-opentelemetry.md)

@@ -55,7 +55,7 @@ if (
 }
 
 export const constants = Object.freeze({
-  PORT: parseInt(process.env.PORT || '3000'),
+  PORT: parseInt(process.env.PORT || '4318'),
   AUTH_KEY,
   BEE_AUTH_HEADER: 'x-bee-authorization',
   GIT_TAG: process.env.GIT_TAG || '0.0.0',

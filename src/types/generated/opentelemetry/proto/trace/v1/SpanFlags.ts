@@ -1,0 +1,20 @@
+// Original file: src/protos/trace.proto
+
+export const SpanFlags = {
+  SPAN_FLAGS_DO_NOT_USE: 'SPAN_FLAGS_DO_NOT_USE',
+  SPAN_FLAGS_TRACE_FLAGS_MASK: 'SPAN_FLAGS_TRACE_FLAGS_MASK',
+  SPAN_FLAGS_CONTEXT_HAS_IS_REMOTE_MASK: 'SPAN_FLAGS_CONTEXT_HAS_IS_REMOTE_MASK',
+  SPAN_FLAGS_CONTEXT_IS_REMOTE_MASK: 'SPAN_FLAGS_CONTEXT_IS_REMOTE_MASK'
+} as const;
+
+export type SpanFlags =
+  | 'SPAN_FLAGS_DO_NOT_USE'
+  | 0
+  | 'SPAN_FLAGS_TRACE_FLAGS_MASK'
+  | 255
+  | 'SPAN_FLAGS_CONTEXT_HAS_IS_REMOTE_MASK'
+  | 256
+  | 'SPAN_FLAGS_CONTEXT_IS_REMOTE_MASK'
+  | 512;
+
+export type SpanFlags__Output = (typeof SpanFlags)[keyof typeof SpanFlags];

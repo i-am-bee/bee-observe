@@ -27,9 +27,11 @@ import { swaggerPlugin } from './utils/swagger.js';
 import { constants } from './utils/constants.js';
 import traceModule from './trace/trace.module.js';
 import spanModule from './span/span.module.js';
+import systemModule from './system/system.module.js';
 import { LogLabels, fastifyLogger, getCorrelationId } from './utils/logger.js';
 import { contextPlugin } from './utils/context.js';
 import { errorPlugin } from './utils/error.js';
+import { traceProtobufBufferParser } from './trace/trace.service.js';
 
 interface BootstrapOptions {
   port: number;
@@ -44,6 +46,13 @@ export async function bootstrap({ port }: BootstrapOptions) {
     pluginTimeout: 60_000,
     bodyLimit: constants.FASTIFY_BODY_LIMIT
   }).withTypeProvider<JsonSchemaToTsProvider>();
+
+  // Custom parser for "application/x-protobuf"
+  app.addContentTypeParser(
+    'application/x-protobuf',
+    { parseAs: 'buffer' },
+    traceProtobufBufferParser
+  );
 
   // orm
   const db = await initORM();
@@ -79,8 +88,9 @@ export async function bootstrap({ port }: BootstrapOptions) {
 
   // Declare all routes
   app.after(() => {
-    app.register(traceModule);
-    app.register(spanModule);
+    app.register(traceModule, { prefix: '/v1' });
+    app.register(spanModule, { prefix: '/v1' });
+    app.register(systemModule);
   });
 
   const url = await app.listen({ port, host: '0.0.0.0' });

@@ -15,15 +15,15 @@
  */
 
 import { FastifyPluginAsyncJsonSchemaToTs } from '@fastify/type-provider-json-schema-to-ts';
+import { StatusCodes } from 'http-status-codes';
 
 import { withResultsResponse, withResultResponse, Tags } from '../utils/swagger.js';
+import { ExportTraceServiceRequest__Output } from '../types/generated/opentelemetry/proto/collector/trace/v1/ExportTraceServiceRequest.js';
 
 import {
   traceSchema,
   traceGetOneParamsSchema,
   TraceGetOneParams,
-  TracePostBodySchema,
-  TracePostBody,
   TraceGetOneQuery,
   traceGetOneQuerySchema,
   traceGetQuerySchema,
@@ -33,7 +33,7 @@ import { createTrace, getTrace, getTraces } from './trace.service.js';
 
 const module: FastifyPluginAsyncJsonSchemaToTs = async (app) => {
   app.get<{ Querystring: TraceGetQuery }>(
-    '/trace',
+    '/traces',
     {
       preHandler: app.auth([app.beeAuth]),
       schema: {
@@ -52,7 +52,7 @@ const module: FastifyPluginAsyncJsonSchemaToTs = async (app) => {
   );
 
   app.get<{ Params: TraceGetOneParams; Querystring: TraceGetOneQuery }>(
-    '/trace/:id',
+    '/traces/:id',
     {
       preHandler: app.auth([app.beeAuth]),
       schema: {
@@ -71,22 +71,20 @@ const module: FastifyPluginAsyncJsonSchemaToTs = async (app) => {
     }
   );
 
-  app.post<{ Body: TracePostBody }>(
-    '/trace',
+  app.post<{
+    Body: ExportTraceServiceRequest__Output;
+  }>(
+    '/traces',
     {
       preHandler: app.auth([app.beeAuth]),
       schema: {
-        response: withResultResponse(traceSchema),
-        body: TracePostBodySchema,
         tags: [Tags.Trace]
       }
     },
-    async ({ body }) => {
-      const trace = await createTrace(body);
+    async ({ body }, res) => {
+      await createTrace(body);
 
-      return {
-        result: trace
-      };
+      res.code(StatusCodes.CREATED);
     }
   );
 };

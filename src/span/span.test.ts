@@ -14,24 +14,28 @@
  * limitations under the License.
  */
 
-import { expect, test, describe, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { Version } from 'bee-agent-framework';
 
-import { makeRequest, tracePostBody } from '../utils/testing.js';
-import { TracePostBody } from '../trace/trace.dto.js';
+import { sdk, spanTraceExporterProcessor } from '../testing/telemetry.js';
+import { agent, makeRequest } from '../testing/utils.js';
+
+let traceId: string | undefined = undefined;
+const prompt = 'hello';
 
 describe('span module', () => {
-  let traceId: string | undefined = undefined;
   beforeAll(async () => {
-    const createTraceResponse = await makeRequest<TracePostBody>({
-      route: 'trace',
-      method: 'POST',
-      body: tracePostBody
-    });
-    traceId = (await createTraceResponse.json()).result.id;
+    await sdk.start();
+    await agent.run({ prompt }).middleware((ctx) => (traceId = ctx.emitter.trace?.id));
+    await spanTraceExporterProcessor.forceFlush();
   });
-  test('should return empty array for not existing trace', async () => {
-    const res = await makeRequest({ route: 'span?trace_id=notExisting' });
 
+  afterAll(async () => {
+    await sdk.shutdown(); // Ensure spans are flushed after each test
+  });
+
+  it('should return empty array for not existing trace', async () => {
+    const res = await makeRequest({ route: 'v1/traces/notExisting/spans' });
     // assert it was successful response
     expect(res.status).toBe(200);
 
@@ -41,55 +45,28 @@ describe('span module', () => {
       total_count: 0
     });
   });
-  test('should return base span objects for the specific trace', async () => {
-    const res = await makeRequest({ route: `span?trace_id=${traceId}` });
+
+  it('should return base span objects for the specific trace', async () => {
+    const res = await makeRequest({ route: `v1/traces/${traceId}/spans` });
 
     expect(res.status).toBe(200);
 
     const { total_count, results } = await res.json();
-    expect(total_count).toBe(10);
+    expect(total_count).toBeGreaterThan(0);
 
-    expect(results[0]).toEqual({
-      attributes: {
-        ctx: null,
-        target: 'react agent'
-      },
-      context: {
-        span_id: 'agent-on-start'
-      },
-      end_time: '2024-07-17T12:15:48.416Z',
-      name: 'onStart',
-      start_time: '2024-07-17T12:15:48.416Z',
-      status_code: 'OK',
-      status_message: ''
-    });
-  });
+    const mainSpan = results.find(
+      (result: any) => result.name === `bee-agent-framework-BeeAgent-${traceId}`
+    );
 
-  test('should return span objects with attribute ctx data for the specific trace', async () => {
-    const res = await makeRequest({
-      route: `span?trace_id=${traceId}&include_attributes_ctx=true`
-    });
+    expect(mainSpan.attributes.traceId).toBe(traceId);
+    expect(mainSpan.attributes.version).toBe(Version);
+    expect(mainSpan.attributes.prompt).toBe(prompt);
+    expect(mainSpan.attributes.response.text.length).toBeGreaterThan(0);
+    expect(mainSpan.ctx).toBeUndefined();
 
-    expect(res.status).toBe(200);
-
-    const { total_count, results } = await res.json();
-    expect(total_count).toBe(10);
-
-    expect(results[0]).toEqual({
-      attributes: {
-        ctx: {
-          userId: 'xx'
-        },
-        target: 'react agent'
-      },
-      context: {
-        span_id: 'agent-on-start'
-      },
-      end_time: '2024-07-17T12:15:48.416Z',
-      name: 'onStart',
-      start_time: '2024-07-17T12:15:48.416Z',
-      status_code: 'OK',
-      status_message: ''
-    });
+    const startSpan = results.find((result: any) => result.name === 'ollama.chat_llm.start-1');
+    expect(
+      startSpan.attributes.data.input.find((input: any) => input.role === 'system').text.length
+    ).toBeGreaterThan(0);
   });
 });

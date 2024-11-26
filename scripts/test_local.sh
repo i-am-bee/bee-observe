@@ -32,7 +32,7 @@ docker compose build
 if timeout 120 yarn start:infra 2>/dev/null ; then
     echo '🆗 docker containers are working and ready to test'
 else
-    echo '❌ There is some error with the docker compose up command. Check your environments in .env.testing and see docker logs ...'
+    echo '❌ There is some error with the docker compose up command. Check your environments in .env.testing.docker and see docker logs ...'
     docker compose logs
     exit 1;
 fi
@@ -44,7 +44,7 @@ yarn mikro-orm-esm migration:up
 if timeout 120 docker compose up -d 2>/dev/null ; then
     echo '🆗 docker containers are working and ready to test'
 else
-    echo '❌ There is some error with the docker compose up command. Check your environments in .env.testing and see docker logs ...'
+    echo '❌ There is some error with the docker compose up command. Check your environments in .env.testing.docker and see docker logs ...'
     docker compose logs
     exit 1;
 fi
