@@ -134,7 +134,10 @@ yarn dev
 
 ### 🪑 Setup with OpenTelemetry
 
-See the [Using Bee Observe OTLP Backend with OpenTelemetry](./docs/using-with-opentelemetry.md) section for instructions on how to use the Observe backend with the OpenTelemetry stack.
+The Observe service can be used only with the [bee-agent-framework](https://github.com/i-am-bee/bee-agent-framework).
+See [OpenTelemetry Instrumentation in Bee-Agent-Framework](https://github.com/i-am-bee/bee-agent-framework/blob/main/docs/instrumentation.md) for instructions on how to enable the instrumentation there.
+
+For more info on setting up observe service in the [OpenTelemetry collector](https://opentelemetry.io/docs/collector/) read the [Configuration](https://opentelemetry.io/docs/collector/configuration/#exporters) page.
 
 ### 🧪 Run tests
 
@@ -165,4 +168,3 @@ Read all related document pages carefully to understand the Observer API archite
 - [Overview](./docs/overview.md)
 - [API](./docs/api.md)
 - [Data persistence](./docs/data-persistence.md)
-- [Using Bee Observe OTLP Backend with OpenTelemetry](./docs/using-with-opentelemetry.md)

@@ -77,5 +77,8 @@ export const constants = Object.freeze({
     TRACE_DELETE_IN_BATCHES_BATCH_SIZE: parseInt(
       process.env.MLFLOW_TRACE_DELETE_IN_BATCHES_BATCH_SIZE || '100'
     )
-  })
+  }),
+  OPENTELEMETRY: {
+    INSTRUMENTATION_SCOPE: 'bee-agent-framework'
+  }
 });

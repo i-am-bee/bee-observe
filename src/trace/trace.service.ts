@@ -26,6 +26,7 @@ import { Span } from '../span/span.document.js';
 import { ExportTraceServiceRequest__Output } from '../types/generated/opentelemetry/proto/collector/trace/v1/ExportTraceServiceRequest.js';
 import { findMainSpan } from '../span/utilt.js';
 import { getServiceLogger } from '../utils/logger-factories.js';
+import { constants } from '../utils/constants.js';
 
 import { TraceDto, TraceGetOneQuery, TraceGetQuery } from './trace.dto.js';
 import { assemblyTrace } from './utils/assembly-trace.js';
@@ -81,9 +82,13 @@ export async function getTrace({
 
 export async function createTrace(traceBody: ExportTraceServiceRequest__Output): Promise<TraceDto> {
   const spans = [...traceBody.resourceSpans].flatMap((resourceSpan) => {
-    return resourceSpan.scopeSpans.flatMap((scopeSpan) => {
-      return scopeSpan.spans.map((span) => new Span(span));
-    });
+    return resourceSpan.scopeSpans
+      .filter(
+        (scopeSpan) => scopeSpan.scope?.name === constants.OPENTELEMETRY.INSTRUMENTATION_SCOPE
+      )
+      .flatMap((scopeSpan) => {
+        return scopeSpan.spans.map((span) => new Span(span));
+      });
   });
 
   const mainSpan = findMainSpan(spans);
@@ -132,7 +137,7 @@ export function traceProtobufBufferParser(
   payload: string | Buffer,
   done: ContentTypeParserDoneFunction
 ) {
-  if (req.url !== '/v1/traces') {
+  if (req.url !== '/v1/traces' || req.method.toLowerCase() !== 'post') {
     return done(
       new ErrorWithProps(
         'Invalid url for protobuf format',
