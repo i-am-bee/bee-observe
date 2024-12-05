@@ -31,18 +31,6 @@ const traceErrorSchema = {
   }
 } as const satisfies JSONSchema;
 
-const metadataSchema = {
-  type: 'object',
-  maxProperties: 16,
-  propertyNames: {
-    pattern: '^.{1,64}$'
-  },
-  patternProperties: {
-    '.*': { type: 'string', maxLength: 512 }
-  },
-  additionalProperties: false
-} as const satisfies JSONSchema;
-
 const traceTreeItemEventSchema = {
   type: 'object',
   additionalProperties: false,
@@ -108,24 +96,7 @@ const traceRequestSchema = {
     message: { type: 'string' },
     history: {
       type: 'array',
-      items: {
-        type: 'object',
-        required: ['role', 'content'],
-        additionalProperties: false,
-        properties: {
-          role: { type: 'string' },
-          content: { type: 'string' },
-          metadata: metadataSchema
-        }
-      }
-    },
-    connector: {
-      type: 'object',
-      additionalProperties: false,
-      required: ['version'],
-      properties: {
-        version: { type: 'string' }
-      }
+      items: unkownDataObjectSchema
     },
     framework: {
       type: 'object',
@@ -134,21 +105,11 @@ const traceRequestSchema = {
       properties: {
         version: { type: 'string' }
       }
-    },
-    rawPrompt: {
-      type: 'string'
     }
   }
 } as const satisfies JSONSchema;
 
-const traceResponseSchema = {
-  type: 'object',
-  required: ['text'],
-  additionalProperties: true,
-  properties: {
-    text: { type: 'string' }
-  }
-} as const satisfies JSONSchema;
+export const traceResponseSchema = unkownDataObjectSchema;
 
 export const traceSchema = {
   type: 'object',
@@ -187,36 +148,6 @@ export const traceGetOneQuerySchema = {
   }
 } as const satisfies JSONSchema;
 
-export const TracePostBodySchema = {
-  type: 'object',
-  required: ['request', 'spans'],
-  properties: {
-    /**
-     * It will be distributed as JSON to all clients
-     * Basically, the most important request property will be messages but everything else can be recorded like:
-     * - tools
-     * - input final prompt template
-     * - memory information
-     */
-    request: traceRequestSchema,
-    response: traceResponseSchema,
-    spans: {
-      type: 'array',
-      minItems: 1,
-      items: spanSchema
-    },
-    // eveluation optional part
-    experiment_tracker: {
-      type: 'object',
-      nullable: true,
-      properties: {
-        experiment_id: { type: 'string' },
-        run_id: { type: 'string' }
-      }
-    }
-  }
-} as const satisfies JSONSchema;
-
 const paginationSchema = getPaginationSchema();
 export const traceGetQuerySchema = {
   ...paginationSchema,
@@ -229,9 +160,7 @@ export const traceGetQuerySchema = {
 export type TraceDto = FromSchema<typeof traceSchema>;
 export type TraceError = FromSchema<typeof traceErrorSchema>;
 export type TraceGetOneParams = FromSchema<typeof traceGetOneParamsSchema>;
-export type TracePostBody = FromSchema<typeof TracePostBodySchema>;
 export type TraceRequest = FromSchema<typeof traceRequestSchema>;
-export type TraceResponse = FromSchema<typeof traceResponseSchema>;
 export type TraceGetOneQuery = FromSchema<typeof traceGetOneQuerySchema>;
 export type TraceGetQuery = FromSchema<typeof traceGetQuerySchema>;
 export type TraceTreeItem = FromSchema<typeof traceTreeItemSchema>;

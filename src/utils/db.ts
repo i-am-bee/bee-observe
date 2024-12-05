@@ -71,8 +71,8 @@ export function wrapInRequestContext(fn: () => Promise<void>) {
   });
 }
 
-export function isValidObjectId(id: string): boolean {
-  return /^[0-9a-fA-F]{24}$/.test(id);
+export function isValidFrameworkId(id: string): boolean {
+  return /^[0-9a-zA-Z]{8}$/.test(id);
 }
 
 interface Index {

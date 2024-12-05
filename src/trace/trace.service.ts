@@ -15,16 +15,25 @@
  */
 
 import { StatusCodes } from 'http-status-codes';
-import { ObjectId } from '@mikro-orm/mongodb';
+import { ObjectId, QueryOrderNumeric } from '@mikro-orm/mongodb';
+import { ContentTypeParserDoneFunction } from 'fastify/types/content-type-parser.js';
+import { FastifyRequest } from 'fastify';
 
 import { ORM } from '../utils/db.js';
 import { ErrorWithProps, ErrorWithPropsCodes } from '../utils/error.js';
 import { addMlflowTraceToQueue } from '../mlflow/queue/mlflow-trace-create.queue.js';
 import { Span } from '../span/span.document.js';
+import { ExportTraceServiceRequest__Output } from '../types/generated/opentelemetry/proto/collector/trace/v1/ExportTraceServiceRequest.js';
+import { findMainSpan } from '../span/utilt.js';
+import { getServiceLogger } from '../utils/logger-factories.js';
+import { constants } from '../utils/constants.js';
 
-import { TraceDto, TraceGetOneQuery, TraceGetQuery, TracePostBody } from './trace.dto.js';
+import { TraceDto, TraceGetOneQuery, TraceGetQuery } from './trace.dto.js';
 import { assemblyTrace } from './utils/assembly-trace.js';
 import { toDto } from './utils/to-dto.js';
+import { ExportTraceServiceRequest } from './trace.proto.js';
+
+const logger = getServiceLogger('trace');
 
 export async function getTraces(query: TraceGetQuery): Promise<{
   totalCount: number;
@@ -35,6 +44,9 @@ export async function getTraces(query: TraceGetQuery): Promise<{
   const [traces, totalCount] = await ORM.trace.findAndCount(
     {},
     {
+      orderBy: {
+        createdAt: QueryOrderNumeric.DESC
+      },
       limit: limit,
       offset: offset
     }
@@ -52,7 +64,7 @@ export async function getTrace({
   id: string;
   query: TraceGetOneQuery;
 }): Promise<TraceDto | null> {
-  const trace = await ORM.trace.findOne({ id });
+  const trace = await ORM.trace.findOne({ frameworkTraceId: id });
 
   if (!trace) {
     throw new ErrorWithProps(
@@ -68,16 +80,46 @@ export async function getTrace({
   return toDto({ trace, mlflowTrace, flags: query });
 }
 
-export async function createTrace(traceBody: TracePostBody): Promise<TraceDto> {
-  const traceId = new ObjectId().toString();
+export async function createTrace(traceBody: ExportTraceServiceRequest__Output): Promise<TraceDto> {
+  const spans = [...traceBody.resourceSpans].flatMap((resourceSpan) => {
+    return resourceSpan.scopeSpans
+      .filter(
+        (scopeSpan) => scopeSpan.scope?.name === constants.OPENTELEMETRY.INSTRUMENTATION_SCOPE
+      )
+      .flatMap((scopeSpan) => {
+        return scopeSpan.spans.map((span) => new Span(span));
+      });
+  });
 
-  const spans = traceBody.spans.map((span) => new Span(span));
+  if (spans.length === 0) {
+    throw new ErrorWithProps(
+      `There are no spans to process`,
+      { code: ErrorWithPropsCodes.INVALID_ARGUMENT },
+      StatusCodes.BAD_REQUEST
+    );
+  }
+
+  const mainSpan = findMainSpan(spans);
+  if (!mainSpan) {
+    throw new ErrorWithProps(
+      `The root span does not exist`,
+      { code: ErrorWithPropsCodes.INVALID_ARGUMENT },
+      StatusCodes.BAD_REQUEST
+    );
+  }
+  const { traceId } = mainSpan.attributes;
 
   const trace = assemblyTrace({
     spans,
     traceId,
-    request: traceBody.request,
-    response: traceBody.response
+    request: {
+      message: mainSpan.attributes.prompt,
+      history: mainSpan.attributes.history,
+      framework: { version: mainSpan.attributes.version }
+    },
+    response: mainSpan.attributes.response,
+    startTime: mainSpan.startTime,
+    endTime: mainSpan.endTime
   });
 
   // save trace
@@ -85,9 +127,7 @@ export async function createTrace(traceBody: TracePostBody): Promise<TraceDto> {
 
   // mlflow processing
   addMlflowTraceToQueue({
-    traceId,
-    runId: traceBody.experiment_tracker?.run_id,
-    experimentId: traceBody.experiment_tracker?.experiment_id
+    traceId: trace.id
   });
 
   return toDto({
@@ -98,4 +138,55 @@ export async function createTrace(traceBody: TracePostBody): Promise<TraceDto> {
       include_tree: true
     }
   });
+}
+
+export function traceProtobufBufferParser(
+  req: FastifyRequest,
+  payload: string | Buffer,
+  done: ContentTypeParserDoneFunction
+) {
+  if (req.url !== '/v1/traces' || req.method.toLowerCase() !== 'post') {
+    return done(
+      new ErrorWithProps(
+        'Invalid url for protobuf format',
+        { code: ErrorWithPropsCodes.NOT_FOUND },
+        StatusCodes.NOT_FOUND
+      )
+    );
+  }
+  if (!Buffer.isBuffer(payload)) {
+    return done(
+      new ErrorWithProps(
+        'Invalid buffer format',
+        { code: ErrorWithPropsCodes.INVALID_ARGUMENT },
+        StatusCodes.BAD_REQUEST
+      )
+    );
+  }
+
+  try {
+    const uint8ArrayPayload = new Uint8Array(payload);
+
+    // First, verify the buffer against the schema
+    const errMsg = ExportTraceServiceRequest.verify(uint8ArrayPayload);
+    if (errMsg) {
+      throw new Error(`Protobuf validation failed: ${errMsg}`);
+    }
+
+    // decode buffer
+    const message = ExportTraceServiceRequest.decode(uint8ArrayPayload);
+    done(null, message);
+  } catch (error) {
+    logger.error({ error }, 'Invalid buffer format');
+    done(
+      new ErrorWithProps(
+        'Invalid buffer format',
+        {
+          code: ErrorWithPropsCodes.INVALID_ARGUMENT,
+          reason: error instanceof Error ? error.message : undefined
+        },
+        StatusCodes.BAD_REQUEST
+      )
+    );
+  }
 }

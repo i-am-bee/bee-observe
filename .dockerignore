@@ -11,7 +11,8 @@ temp
 Dockerfile
 coverage
 .husky
-.env.testing
+.env.testing.local
+.env.testing.docker
 .env
 .travis.yml
 scripts

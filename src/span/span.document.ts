@@ -19,9 +19,13 @@ import { ObjectId } from '@mikro-orm/mongodb';
 
 import { BaseDocument } from '../utils/base.document.js';
 import { Trace } from '../trace/trace.document.js';
+import type { Span__Output } from '../types/generated/opentelemetry/proto/trace/v1/Span.js';
+import { _opentelemetry_proto_trace_v1_Status_StatusCode } from '../types/generated/opentelemetry/proto/trace/v1/Status.js';
 
 import { SpanDto } from './span.dto.js';
+import { getAttributeValue, uint8ArrayToHexString, unixNanoToDate } from './utilt.js';
 
+// this entity represents https://opentelemetry.io/docs/concepts/signals/traces/#spans
 @Entity()
 export class Span extends BaseDocument {
   @Property()
@@ -53,12 +57,14 @@ export class Span extends BaseDocument {
   @ManyToOne()
   trace!: Ref<Trace>;
 
-  constructor(input: SpanDto) {
+  constructor(input: Span__Output) {
     super(new ObjectId());
-    Object.assign(this, this.fromTelemetry(input));
+    Object.assign(this, this.fromProtoTelemetry(input));
   }
 
   toTelemetry({ include_attributes_ctx }: { include_attributes_ctx: boolean }): SpanDto {
+    const { ctx, ...otherAttributes } = this.attributes;
+
     return {
       name: this.name,
       parent_id: this.parentId,
@@ -70,30 +76,47 @@ export class Span extends BaseDocument {
         span_id: this.context.spanId
       },
       attributes: {
-        target: this.attributes.target,
-        data: this.attributes.data,
-        ctx: include_attributes_ctx ? this.attributes.ctx : null
+        ...otherAttributes,
+        ctx: include_attributes_ctx ? this.attributes.ctx : undefined
       }
     };
   }
 
-  fromTelemetry(span: SpanDto): SpanInput {
+  fromProtoTelemetry(span: Span__Output): SpanInput {
+    const { attributes } = span;
+
+    const data = getAttributeValue({ attributes, key: 'data' });
+    const ctx = getAttributeValue({ attributes, key: 'ctx' });
+    const history = getAttributeValue({ attributes, key: 'history' });
+    const response = getAttributeValue({ attributes, key: 'response' });
+    const statusCode: number = (span.status?.code as any) || 1;
+
     return {
       name: span.name,
-      parentId: span.parent_id,
-      startTime: new Date(span.start_time),
-      endTime: new Date(span.end_time),
-      statusCode: span.status_code,
-      statusMessage: span.status_message,
+      parentId: span.parentSpanId && uint8ArrayToHexString(span.parentSpanId),
+      startTime: unixNanoToDate(span.startTimeUnixNano as any),
+      endTime: unixNanoToDate(span.endTimeUnixNano as any),
+      statusCode: statusCode === 1 ? 'OK' : 'ERROR',
+      statusMessage: span.status?.message,
       context: {
-        spanId: span.context.span_id
+        spanId: uint8ArrayToHexString(span.spanId)
       },
-      attributes: span.attributes
+      attributes: {
+        data: data && JSON.parse(data),
+        ctx: ctx && JSON.parse(ctx),
+        target: getAttributeValue({ attributes, key: 'target' }),
+        name: getAttributeValue({ attributes, key: 'name' }),
+        traceId: getAttributeValue({ attributes, key: 'traceId' }),
+        prompt: getAttributeValue({ attributes, key: 'prompt' }),
+        version: getAttributeValue({ attributes, key: 'version' }),
+        response: response && JSON.parse(response),
+        history: history && JSON.parse(history)
+      }
     };
   }
 }
 
 export type SpanInput = Omit<
   Span,
-  '_id' | 'id' | 'createdAt' | 'trace' | 'toTelemetry' | 'fromTelemetry'
+  '_id' | 'id' | 'createdAt' | 'trace' | 'toTelemetry' | 'fromProtoTelemetry'
 >;

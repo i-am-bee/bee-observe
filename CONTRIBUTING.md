@@ -44,7 +44,8 @@ yarn install
 5.  **Setup environmental variables:** You should set the following variables in your `.env` file in the repository’s root.
 
 - copy [.env.example](./.env.example) and fill the right values.
-- The [.env.testing](./.env.testing) is used for integration API testing in docker
+- The [.env.testing.local](./.env.testing.local) is used directly in the vitest runtime for all tests running locally.
+- The [.env.testing.docker](./.env.testing.docker) is used for integration API testing in docker.
 
 6.  **Run migrations** You should run database migrations to prepare the necessary data for a valid application run.
 

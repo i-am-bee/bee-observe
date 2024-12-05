@@ -20,13 +20,16 @@ import { ObjectId } from '@mikro-orm/mongodb';
 import { BaseDocument } from '../utils/base.document.js';
 import { Span } from '../span/span.document.js';
 
-import { TraceError, TraceRequest, TraceResponse } from './trace.dto.js';
+import { TraceError, TraceRequest } from './trace.dto.js';
 import { TreeItem } from './utils/assembly-trace.js';
 
 @Entity()
 export class Trace extends BaseDocument {
   @Property()
   startTime!: Date;
+
+  @Property({ unique: true, index: true })
+  frameworkTraceId!: string;
 
   @Property()
   endTime!: Date;
@@ -44,12 +47,12 @@ export class Trace extends BaseDocument {
   request!: TraceRequest;
 
   @Property()
-  response?: TraceResponse;
+  response?: any;
 
   constructor(input: TraceInput) {
     const { traceId, spans, ...rest } = input;
 
-    super(traceId ? new ObjectId(traceId) : new ObjectId());
+    super(new ObjectId());
 
     Object.assign(this, rest);
     this.spans.set(spans);

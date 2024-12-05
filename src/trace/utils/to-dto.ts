@@ -31,7 +31,7 @@ export function toDto({
   flags: TraceGetOneQuery;
 }): TraceDto {
   return {
-    id: trace.id,
+    id: trace.frameworkTraceId,
     start_at: trace.startTime.toISOString(),
     finish_at: trace.endTime.toISOString(),
     request: trace.request,

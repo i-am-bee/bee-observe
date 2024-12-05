@@ -30,12 +30,9 @@ export function assemblyTraceSpanTree({
   requestId: string;
   trace: Trace;
 }): TraceMlflowTreeItem[] {
-  const createSpanTree = (
-    treeItem: TreeItem,
-    parentId: string | null = null
-  ): TraceMlflowTreeItem[] => {
+  const createSpanTree = (treeItem: TreeItem, parentId: string): TraceMlflowTreeItem[] => {
     const span = {
-      name: treeItem.id,
+      name: treeItem.name,
       context: {
         trace_id: requestId,
         span_id: treeItem.id
@@ -69,13 +66,15 @@ export function assemblyTraceSpanTree({
     return [span, ...treeItem.children.flatMap((item) => createSpanTree(item, treeItem.id))];
   };
 
+  const mainTreeItem = trace.tree[0];
+
   return [
     // the main trace span - only one top span must be defined
     {
-      name: 'trace',
+      name: mainTreeItem.name,
       context: {
         trace_id: requestId,
-        span_id: trace.id
+        span_id: mainTreeItem.id
       },
       parent_id: null,
       attributes: {
@@ -90,6 +89,6 @@ export function assemblyTraceSpanTree({
       events: [],
       status_message: ''
     },
-    ...trace.tree.flatMap((treeItem) => createSpanTree(treeItem, trace.id))
+    ...mainTreeItem.children.flatMap((treeItem) => createSpanTree(treeItem, mainTreeItem.id))
   ];
 }

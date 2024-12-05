@@ -14,25 +14,26 @@
  * limitations under the License.
  */
 
-import { ObjectId, QueryOrderNumeric } from '@mikro-orm/mongodb';
+import { QueryOrderNumeric } from '@mikro-orm/mongodb';
 
-import { isValidObjectId, ORM } from '../utils/db.js';
+import { isValidFrameworkId, ORM } from '../utils/db.js';
 
-import { SpanDto, SpanGetOneQueryString } from './span.dto.js';
+import { SpanDto, SpanGetOneParams, SpanGetOneQuery } from './span.dto.js';
 
-export async function getSpans(query: SpanGetOneQueryString): Promise<{
+export async function getSpans(props: SpanGetOneParams & SpanGetOneQuery): Promise<{
   totalCount: number;
   spans: SpanDto[];
 }> {
-  if (!isValidObjectId(query.trace_id)) {
+  if (!isValidFrameworkId(props.trace_id)) {
     return {
       totalCount: 0,
       spans: []
     };
   }
+
   const [spans, totalCount] = await ORM.span.findAndCount(
     {
-      trace: new ObjectId(query.trace_id)
+      trace: await ORM.trace.findOne({ frameworkTraceId: props.trace_id })
     },
     {
       orderBy: {
@@ -43,6 +44,6 @@ export async function getSpans(query: SpanGetOneQueryString): Promise<{
 
   return {
     totalCount,
-    spans: spans.map((span) => span.toTelemetry(query))
+    spans: spans.map((span) => span.toTelemetry(props))
   };
 }

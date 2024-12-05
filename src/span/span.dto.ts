@@ -27,9 +27,10 @@ export const spanSchema = {
     parent_id: { type: 'string' },
     start_time: { type: 'string', format: 'date-time' },
     end_time: { type: 'string', format: 'date-time' },
-    status_code: { type: 'string', enum: ['ERROR', 'OK'] },
+    status_code: { type: 'string', enum: ['ERROR', 'OK'] }, // https://opentelemetry.io/docs/concepts/signals/traces/#span-status
     status_message: { type: 'string' },
     context: {
+      // https://opentelemetry.io/docs/concepts/signals/traces/#span-context
       type: 'object',
       required: ['span_id'],
       additionalProperties: false,
@@ -38,26 +39,43 @@ export const spanSchema = {
       }
     },
     attributes: {
+      // https://opentelemetry.io/docs/concepts/signals/traces/#attributes
       type: 'object',
-      required: ['target'],
+      // required: ['target'],
       additionalProperties: false,
       properties: {
         target: { type: 'string' },
-        data: { ...unkownDataObjectSchema, nullable: true },
-        ctx: { ...unkownDataObjectSchema, nullable: true }
+        data: unkownDataObjectSchema,
+        ctx: unkownDataObjectSchema,
+        name: { type: 'string' },
+        traceId: { type: 'string' },
+        version: { type: 'string' },
+        prompt: { type: 'string' },
+        response: unkownDataObjectSchema,
+        history: {
+          type: 'array',
+          items: unkownDataObjectSchema
+        }
       }
     }
   }
 } as const satisfies JSONSchema;
 
-export const spanGetOneQueryStringSchema = {
+export const spanGetOneQuerySchema = {
   type: 'object',
-  required: ['trace_id'],
   properties: {
-    trace_id: { type: 'string' },
     include_attributes_ctx: includeProperty
   }
 } as const satisfies JSONSchema;
 
+export const spanGetOneParamsSchema = {
+  type: 'object',
+  required: ['trace_id'],
+  properties: {
+    trace_id: { type: 'string' }
+  }
+} as const satisfies JSONSchema;
+
 export type SpanDto = FromSchema<typeof spanSchema>;
-export type SpanGetOneQueryString = FromSchema<typeof spanGetOneQueryStringSchema>;
+export type SpanGetOneQuery = FromSchema<typeof spanGetOneQuerySchema>;
+export type SpanGetOneParams = FromSchema<typeof spanGetOneParamsSchema>;

@@ -22,11 +22,12 @@
    - [Running the server via Docker](#running-the-server-via-docker)
    - [Running the Server via Node.js](#running-the-server-via-nodejs)
    - [Development Mode](#development-mode)
-4. [🧪 Run tests](#-run-tests)
-5. [📣 Publishing](#-publishing)
-6. [Code of conduct](#code-of-conduct)
-7. [Legal notice](#legal-notice)
-8. [📖 Docs](#-docs)
+4. [🪑 Setup with OpenTelemetry](#-setup-with-opentelemetry)
+5. [🧪 Run tests](#-run-tests)
+6. [📣 Publishing](#-publishing)
+7. [Code of conduct](#code-of-conduct)
+8. [Legal notice](#legal-notice)
+9. [📖 Docs](#-docs)
 
 ## 👩‍💻 Get started with Observe
 
@@ -130,6 +131,13 @@ For development mode with hot-reloading, use:
 ```
 yarn dev
 ```
+
+### 🪑 Setup with OpenTelemetry
+
+The Observe service can be used only with the [bee-agent-framework](https://github.com/i-am-bee/bee-agent-framework).
+See [OpenTelemetry Instrumentation in Bee-Agent-Framework](https://github.com/i-am-bee/bee-agent-framework/blob/main/docs/instrumentation.md) for instructions on how to enable the instrumentation there.
+
+For more info on setting up observe service in the [OpenTelemetry collector](https://opentelemetry.io/docs/collector/) read the [Configuration](https://opentelemetry.io/docs/collector/configuration/#exporters) page.
 
 ### 🧪 Run tests
 
