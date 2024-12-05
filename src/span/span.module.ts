@@ -23,7 +23,7 @@ import { spanGetOneParamsSchema, spanGetOneQuerySchema, spanSchema } from './spa
 
 const module: FastifyPluginAsyncJsonSchemaToTs = async (app) => {
   app.get(
-    '/traces/:trace_id/spans', // TODO:
+    '/traces/:trace_id/spans',
     {
       preHandler: app.auth([app.beeAuth]),
       schema: {

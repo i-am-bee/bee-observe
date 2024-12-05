@@ -72,8 +72,7 @@ export const spanGetOneParamsSchema = {
   type: 'object',
   required: ['trace_id'],
   properties: {
-    trace_id: { type: 'string' },
-    include_attributes_ctx: includeProperty
+    trace_id: { type: 'string' }
   }
 } as const satisfies JSONSchema;
 
