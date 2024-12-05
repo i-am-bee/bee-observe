@@ -29,9 +29,16 @@ import {
   traceGetQuerySchema,
   TraceGetQuery
 } from './trace.dto.js';
-import { createTrace, getTrace, getTraces } from './trace.service.js';
+import { createTrace, getTrace, getTraces, traceProtobufBufferParser } from './trace.service.js';
 
 const module: FastifyPluginAsyncJsonSchemaToTs = async (app) => {
+  // Custom parser for "application/x-protobuf"
+  app.addContentTypeParser(
+    'application/x-protobuf',
+    { parseAs: 'buffer' },
+    traceProtobufBufferParser
+  );
+
   app.get<{ Querystring: TraceGetQuery }>(
     '/traces',
     {

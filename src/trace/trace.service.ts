@@ -91,12 +91,20 @@ export async function createTrace(traceBody: ExportTraceServiceRequest__Output):
       });
   });
 
+  if (spans.length === 0) {
+    throw new ErrorWithProps(
+      `There are no spans to process`,
+      { code: ErrorWithPropsCodes.INVALID_ARGUMENT },
+      StatusCodes.BAD_REQUEST
+    );
+  }
+
   const mainSpan = findMainSpan(spans);
   if (!mainSpan) {
     throw new ErrorWithProps(
       `The root span does not exist`,
-      { code: ErrorWithPropsCodes.NOT_FOUND },
-      StatusCodes.NOT_FOUND
+      { code: ErrorWithPropsCodes.INVALID_ARGUMENT },
+      StatusCodes.BAD_REQUEST
     );
   }
   const { traceId } = mainSpan.attributes;
