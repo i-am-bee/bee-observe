@@ -20,6 +20,7 @@ import { StatusCodes } from 'http-status-codes';
 import { withResultsResponse, withResultResponse, Tags } from '../utils/swagger.js';
 import { ExportTraceServiceRequest__Output } from '../types/generated/opentelemetry/proto/collector/trace/v1/ExportTraceServiceRequest.js';
 import { getModuleLogger } from '../utils/logger-factories.js';
+import { constants } from '../utils/constants.js';
 
 import {
   traceSchema,
@@ -96,8 +97,7 @@ const module: FastifyPluginAsyncJsonSchemaToTs = async (app) => {
         body.resourceSpans.flatMap((resourceSpan) =>
           resourceSpan.scopeSpans.flatMap((scopeSpan) => {
             return {
-              scopeName: scopeSpan.scope?.name,
-              spanNames: scopeSpan.spans.map((span) => span.name)
+              scopeName: scopeSpan.scope?.name
             };
           })
         ),

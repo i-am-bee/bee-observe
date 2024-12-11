@@ -91,9 +91,13 @@ export class Span extends BaseDocument {
     const response = getAttributeValue({ attributes, key: 'response' });
     const statusCode: number = (span.status?.code as any) || 1;
 
+    const traceId = getAttributeValue({ attributes, key: 'traceId' });
+
     return {
       name: span.name,
-      parentId: span.parentSpanId && uint8ArrayToHexString(span.parentSpanId),
+      parentId: !traceId
+        ? span.parentSpanId && uint8ArrayToHexString(span.parentSpanId)
+        : undefined,
       startTime: unixNanoToDate(span.startTimeUnixNano as any),
       endTime: unixNanoToDate(span.endTimeUnixNano as any),
       statusCode: statusCode === 1 ? 'OK' : 'ERROR',
@@ -106,7 +110,7 @@ export class Span extends BaseDocument {
         ctx: ctx && JSON.parse(ctx),
         target: getAttributeValue({ attributes, key: 'target' }),
         name: getAttributeValue({ attributes, key: 'name' }),
-        traceId: getAttributeValue({ attributes, key: 'traceId' }),
+        traceId: traceId,
         prompt: getAttributeValue({ attributes, key: 'prompt' }),
         version: getAttributeValue({ attributes, key: 'version' }),
         response: response && JSON.parse(response),
