@@ -19,6 +19,7 @@ import { StatusCodes } from 'http-status-codes';
 
 import { withResultsResponse, withResultResponse, Tags } from '../utils/swagger.js';
 import { ExportTraceServiceRequest__Output } from '../types/generated/opentelemetry/proto/collector/trace/v1/ExportTraceServiceRequest.js';
+import { getModuleLogger } from '../utils/logger-factories.js';
 
 import {
   traceSchema,
@@ -30,6 +31,8 @@ import {
   TraceGetQuery
 } from './trace.dto.js';
 import { createTrace, getTrace, getTraces, traceProtobufBufferParser } from './trace.service.js';
+
+const logger = getModuleLogger('trace');
 
 const module: FastifyPluginAsyncJsonSchemaToTs = async (app) => {
   // Custom parser for "application/x-protobuf"
@@ -89,6 +92,17 @@ const module: FastifyPluginAsyncJsonSchemaToTs = async (app) => {
       }
     },
     async ({ body }, res) => {
+      logger.debug(
+        body.resourceSpans.flatMap((resourceSpan) =>
+          resourceSpan.scopeSpans.flatMap((scopeSpan) => {
+            return {
+              scopeName: scopeSpan.scope?.name,
+              spanNames: scopeSpan.spans.map((span) => span.name)
+            };
+          })
+        ),
+        'incoming trace data'
+      );
       await createTrace(body);
 
       res.code(StatusCodes.CREATED);

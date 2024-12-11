@@ -109,12 +109,12 @@ export const errorPlugin: FastifyPluginAsync = fp.default(async (app) => {
         message: error.message
       });
     } else {
-      this.log.error(error);
       reply.status(StatusCodes.INTERNAL_SERVER_ERROR).send({
         code: ErrorWithPropsCodes.INTERNAL_SERVER_ERROR,
         message: 'An unspecified error occurred'
       });
     }
+    this.log.error(error);
   });
 });
 
