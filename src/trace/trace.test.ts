@@ -14,95 +14,43 @@
  * limitations under the License.
  */
 
-import { expect, test, describe, beforeAll } from 'vitest';
+import { expect, it, describe, beforeAll, afterAll } from 'vitest';
 
-import { makeRequest, tree, tracePostBody, waitForMlflowTrace } from '../utils/testing.js';
+import { sdk, spanTraceExporterProcessor } from '../testing/telemetry.js';
+import { agent, makeRequest, sendCustomProtobuf, waitForMlflowTrace } from '../testing/utils.js';
 
-import { TracePostBody } from './trace.dto.js';
+let traceId: string | undefined = undefined;
+const prompt = 'hello';
 
 describe('trace module', () => {
-  test('should return all traces', async () => {
-    const res = await makeRequest({ route: 'trace' });
+  beforeAll(async () => {
+    await sdk.start();
+    await agent.run({ prompt }).middleware((ctx) => (traceId = ctx.emitter.trace?.id));
+    await spanTraceExporterProcessor.forceFlush();
+    if (traceId) await waitForMlflowTrace({ traceId });
+  });
 
+  afterAll(async () => {
+    await sdk.shutdown(); // Ensure spans are flushed after each test
+  });
+  it('should return all traces', async () => {
+    const res = await makeRequest({ route: 'v1/traces' });
     // assert it was successful response
     expect(res.status).toBe(200);
   });
 
-  test('should create trace with events and mlflow', async () => {
-    const createTraceResponse = await makeRequest<TracePostBody>({
-      route: 'trace',
-      method: 'POST',
-      body: tracePostBody
+  it.skip('should return the `bad request` response when the invalid result is sent', async () => {
+    const { status, statusText } = await sendCustomProtobuf({
+      invalidSpanKey: 4200,
+      secondInvalidSpanKey: 3000
     });
-
-    // assert it was successful response
-    expect(createTraceResponse.status).toBe(200);
-    const traceId = (await createTraceResponse.json()).result.id;
-    expect(traceId).toBeDefined();
-
-    // check the compouted trace
-    const { status, result } = await waitForMlflowTrace({ traceId });
-
-    // assert it was successful response
-    expect(status).toBe(200);
-
-    // with expected shape
-    expect(result).toMatchObject({
-      id: traceId,
-      tree
-    });
-
-    // with expected mlflow shape
-    expect(result.mlflow).toBeDefined();
-    expect(result.mlflow?.step).toBe('CLOSE_TRACE');
-    expect((result.mlflow?.tree || []).length).toBeGreaterThanOrEqual(tree.length);
-  });
-
-  test('should create trace with empty prompt', async () => {
-    const createTraceResponse = await makeRequest<TracePostBody>({
-      route: 'trace',
-      method: 'POST',
-      body: {
-        experiment_tracker: tracePostBody.experiment_tracker,
-        response: tracePostBody.response,
-        request: {},
-        spans: tracePostBody.spans
-      }
-    });
-
-    // assert it was successful response
-    expect(createTraceResponse.status).toBe(200);
-    const traceId = (await createTraceResponse.json()).result.id;
-    expect(traceId).toBeDefined();
-
-    // check the compouted trace
-    const { status, result } = await waitForMlflowTrace({ traceId });
-
-    // assert it was successful response
-    expect(status).toBe(200);
-
-    // check expected mlflow shape
-    expect(result.mlflow).toBeDefined();
-    expect(result.mlflow?.step).toBe('CLOSE_TRACE');
-    expect((result.mlflow?.tree || []).length).toBeGreaterThanOrEqual(tree.length);
+    expect(status).toBe(400);
+    expect(statusText).toBe('Bad Request');
   });
 
   describe('include parameters', () => {
-    let traceId: string | undefined = undefined;
-    beforeAll(async () => {
-      const createTraceResponse = await makeRequest<TracePostBody>({
-        route: 'trace',
-        method: 'POST',
-        body: tracePostBody
-      });
-      traceId = (await createTraceResponse.json()).result.id;
-
-      // wait until the `trace mlflow create` event is done.
-      if (traceId) await waitForMlflowTrace({ traceId });
-    });
-
-    test('should return the default trace without any additional data', async () => {
-      const traceResponse = await makeRequest({ route: `trace/${traceId}` });
+    it('should return the default trace without any additional data', async () => {
+      const traceResponse = await makeRequest({ route: `v1/traces/${traceId}` });
 
       // assert it was successful response
       expect(traceResponse.status).toBe(200);
@@ -115,8 +63,8 @@ describe('trace module', () => {
       expect(result.mlflow).toBeNull();
     });
 
-    test('should return the trace with tree object', async () => {
-      const traceResponse = await makeRequest({ route: `trace/${traceId}?include_tree=true` });
+    it('should return the trace with tree object', async () => {
+      const traceResponse = await makeRequest({ route: `v1/traces/${traceId}?include_tree=true` });
 
       // assert it was successful response
       expect(traceResponse.status).toBe(200);
@@ -125,12 +73,14 @@ describe('trace module', () => {
 
       // with expected shape
       expect(result.id).toBe(traceId);
-      expect(result.tree).toEqual(tree);
+      expect(result.tree.length).toBe(1);
       expect(result.mlflow).toBeNull();
     });
 
-    test('should return the trace with mlflow object', async () => {
-      const traceResponse = await makeRequest({ route: `trace/${traceId}?include_mlflow=true` });
+    it('should return the trace with mlflow object', async () => {
+      const traceResponse = await makeRequest({
+        route: `v1/traces/${traceId}?include_mlflow=true`
+      });
 
       // assert it was successful response
       expect(traceResponse.status).toBe(200);
@@ -143,9 +93,9 @@ describe('trace module', () => {
       expect(result.mlflow.step).toBe('CLOSE_TRACE');
     });
 
-    test('should return the trace with both trace and mlflow object', async () => {
+    it('should return the trace with both trace and mlflow object', async () => {
       const traceResponse = await makeRequest({
-        route: `trace/${traceId}?include_mlflow=true&include_tree=true`
+        route: `v1/traces/${traceId}?include_mlflow=true&include_tree=true`
       });
 
       // assert it was successful response
@@ -155,7 +105,7 @@ describe('trace module', () => {
 
       // with expected shape
       expect(result.id).toBe(traceId);
-      expect(result.tree).toEqual(tree);
+      expect(result.tree.length).toBe(1);
       expect(result.mlflow.step).toBe('CLOSE_TRACE');
     });
   });

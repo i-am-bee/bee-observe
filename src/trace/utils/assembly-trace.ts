@@ -16,7 +16,7 @@
 
 import { Span, SpanInput } from '../../span/span.document.js';
 import { Trace } from '../trace.document.js';
-import { TraceRequest, TraceResponse } from '../trace.dto.js';
+import { TraceRequest } from '../trace.dto.js';
 
 type TraceSpan = Omit<SpanInput, 'parentId' | 'context'> & {
   id: Span['context']['spanId'];
@@ -26,6 +26,7 @@ type TraceSpanWithChildren = TraceSpan & { children: TreeItem[] };
 
 export interface TreeItem {
   id: string;
+  name: string;
   target: TraceSpanWithChildren['attributes']['target'];
   startTime: Date;
   endTime: Date;
@@ -87,6 +88,7 @@ const groupBy = (spans: TraceSpanWithChildren[]): TreeItem[] => {
         [key]: {
           target: span.attributes.target,
           id: key,
+          name: span.name,
           startTime: new Date(
             Math.min(
               events[0].startTime.getTime(),
@@ -111,17 +113,23 @@ const groupBy = (spans: TraceSpanWithChildren[]): TreeItem[] => {
   return Object.values(indexed);
 };
 
+interface AssemblyTraceProps {
+  spans: Span[];
+  traceId: string;
+  request: TraceRequest;
+  response?: any;
+  startTime: Date;
+  endTime: Date;
+}
+
 export function assemblyTrace({
   spans,
   traceId,
   request,
-  response
-}: {
-  spans: Span[];
-  traceId: string;
-  request: TraceRequest;
-  response?: TraceResponse;
-}): Trace {
+  response,
+  startTime,
+  endTime
+}: AssemblyTraceProps): Trace {
   const eventsTree = groupBy(
     spans
       .filter((span) => !span.parentId)
@@ -134,9 +142,9 @@ export function assemblyTrace({
   const errorSpan = spans.find((span) => span.statusCode === 'ERROR');
 
   return new Trace({
-    traceId: traceId,
-    startTime: spans[0].startTime,
-    endTime: spans[spans.length - 1].endTime,
+    frameworkTraceId: traceId,
+    startTime: startTime,
+    endTime: endTime,
     tree: eventsTree,
     spans: spans,
     request,

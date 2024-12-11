@@ -19,21 +19,22 @@ import { FastifyPluginAsyncJsonSchemaToTs } from '@fastify/type-provider-json-sc
 import { Tags, withResultsResponse } from '../utils/swagger.js';
 
 import { getSpans } from './span.service.js';
-import { SpanGetOneQueryString, spanGetOneQueryStringSchema, spanSchema } from './span.dto.js';
+import { spanGetOneParamsSchema, spanGetOneQuerySchema, spanSchema } from './span.dto.js';
 
 const module: FastifyPluginAsyncJsonSchemaToTs = async (app) => {
-  app.get<{ Querystring: SpanGetOneQueryString }>(
-    '/span',
+  app.get(
+    '/traces/:trace_id/spans',
     {
       preHandler: app.auth([app.beeAuth]),
       schema: {
         response: withResultsResponse(spanSchema),
-        querystring: spanGetOneQueryStringSchema,
+        querystring: spanGetOneQuerySchema,
+        params: spanGetOneParamsSchema,
         tags: [Tags.Span]
       }
     },
-    async ({ query }) => {
-      const { spans, totalCount } = await getSpans(query);
+    async ({ query, params }) => {
+      const { spans, totalCount } = await getSpans({ ...query, ...params });
       return {
         total_count: totalCount,
         results: spans

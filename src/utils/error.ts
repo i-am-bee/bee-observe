@@ -22,7 +22,7 @@ import { StatusCodes } from 'http-status-codes';
 export enum ErrorWithPropsCodes {
   AUTH_ERROR = 'AUTH_ERROR',
   INTERNAL_SERVER_ERROR = 'INTERNAL_SERVER_ERROR',
-  INVALID_INPUT = 'INVALID_INPUT',
+  INVALID_ARGUMENT = 'INVALID_ARGUMENT',
   NOT_FOUND = 'NOT_FOUND',
   SERVICE_ERROR = 'SERVICE_ERROR',
   SERVICE_UNAVAILABLE = 'SERVICE_UNAVAILABLE',
@@ -94,13 +94,13 @@ export const errorPlugin: FastifyPluginAsync = fp.default(async (app) => {
     } else if (error instanceof SyntaxError) {
       // When request body cannot by parsed by ContentTypeParser
       reply.status(StatusCodes.BAD_REQUEST).send({
-        code: ErrorWithPropsCodes.INVALID_INPUT,
+        code: ErrorWithPropsCodes.INVALID_ARGUMENT,
         message: 'An unspecified syntax error occurred'
       });
     } else if ('validation' in error && error.statusCode === StatusCodes.BAD_REQUEST) {
       // This is ajv validation error
       reply.status(StatusCodes.BAD_REQUEST).send({
-        code: ErrorWithPropsCodes.INVALID_INPUT,
+        code: ErrorWithPropsCodes.INVALID_ARGUMENT,
         message: error.message
       });
     } else if (error.statusCode) {
@@ -178,7 +178,7 @@ export const notFoundResponseSchema = createErrorSchema({
 export const badRequestResponseSchema = createErrorSchema({
   description:
     'Server could not understand the request due to invalid syntax. In most cases relates with the schema validation.',
-  code: ErrorWithPropsCodes.INVALID_INPUT
+  code: ErrorWithPropsCodes.INVALID_ARGUMENT
 });
 
 export const internalServerErrorResponseSchema = createErrorSchema({
