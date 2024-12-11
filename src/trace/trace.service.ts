@@ -80,8 +80,8 @@ export async function getTrace({
   return toDto({ trace, mlflowTrace, flags: query });
 }
 
-export async function createTrace(traceBody: ExportTraceServiceRequest__Output): Promise<TraceDto> {
-  const spans = [...traceBody.resourceSpans].flatMap((resourceSpan) => {
+export async function createTrace(traceBody: ExportTraceServiceRequest__Output): Promise<void> {
+  const spans = traceBody.resourceSpans.flatMap((resourceSpan) => {
     return resourceSpan.scopeSpans
       .filter(
         (scopeSpan) => scopeSpan.scope?.name === constants.OPENTELEMETRY.INSTRUMENTATION_SCOPE
@@ -92,11 +92,8 @@ export async function createTrace(traceBody: ExportTraceServiceRequest__Output):
   });
 
   if (spans.length === 0) {
-    throw new ErrorWithProps(
-      `There are no spans to process`,
-      { code: ErrorWithPropsCodes.INVALID_ARGUMENT },
-      StatusCodes.BAD_REQUEST
-    );
+    logger.debug('There are no spans to process');
+    return;
   }
 
   const mainSpan = findMainSpan(spans);
@@ -128,15 +125,6 @@ export async function createTrace(traceBody: ExportTraceServiceRequest__Output):
   // mlflow processing
   addMlflowTraceToQueue({
     traceId: trace.id
-  });
-
-  return toDto({
-    trace,
-    flags: {
-      include_mlflow: false,
-      include_mlflow_tree: false,
-      include_tree: true
-    }
   });
 }
 
