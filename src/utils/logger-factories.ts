@@ -18,6 +18,7 @@ import { getLogger } from './logger.js';
 import { QueueName } from './queue.js';
 
 export const getServiceLogger = (service: string) => getLogger().child({ service });
+export const getModuleLogger = (module: string) => getLogger().child({ module });
 
 export const getQueueLogger = ({ service, queue }: { service: string; queue: QueueName }) =>
   getServiceLogger(service).child({ queue });

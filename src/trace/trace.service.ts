@@ -154,6 +154,7 @@ export function traceProtobufBufferParser(
       )
     );
   }
+  logger.debug({ base64: payload.toString().slice(0, 100) }, 'trace buffer base64 data');
   if (!Buffer.isBuffer(payload)) {
     return done(
       new ErrorWithProps(
