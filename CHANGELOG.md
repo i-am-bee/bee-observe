@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.0.5](https://github.com/i-am-bee/bee-observe/compare/v0.0.4...v0.0.5) (2024-12-13)
+
+
+### Features
+
+* add logs to trace route ([#8](https://github.com/i-am-bee/bee-observe/issues/8)) ([007869e](https://github.com/i-am-bee/bee-observe/commit/007869e9e835c9c329af6b848c81876eafcdcac1))
+* **mongo:** add missing ttl index ([#5](https://github.com/i-am-bee/bee-observe/issues/5)) ([8cb1f68](https://github.com/i-am-bee/bee-observe/commit/8cb1f6864c13b94e0d1a61c6d528e522beeae535))
+* **trace:** implement otlp http backend ([#7](https://github.com/i-am-bee/bee-observe/issues/7)) ([1296ef5](https://github.com/i-am-bee/bee-observe/commit/1296ef5302990b962e3a161e910318f0aa48c0e2))
+
+
+### Bug Fixes
+
+* main span nesting in new fw version ([#9](https://github.com/i-am-bee/bee-observe/issues/9)) ([3191b50](https://github.com/i-am-bee/bee-observe/commit/3191b50157042ebc114370f6d9c785518c8db561))
+
 ## [0.0.4](https://github.com/i-am-bee/bee-observe/compare/v0.0.3...v0.0.4) (2024-11-05)
 
 ## [0.0.3](https://github.com/i-am-bee/bee-observe/compare/v0.0.2...v0.0.3) (2024-10-09)

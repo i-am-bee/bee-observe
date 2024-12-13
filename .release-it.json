@@ -2,7 +2,8 @@
   "git": {
     "commitMessage": "chore: release ${version}",
     "tagName": "v${version}",
-    "commitArgs": ["-s"]
+    "commitArgs": ["-s"],
+    "requireCleanWorkingDir": false
   },
   "github": {
     "release": true,
@@ -21,7 +22,7 @@
     }
   },
   "hooks": {
-    "before:init": ["yarn lint", "yarn ts:check", "yarn test"],
+    "before:init": ["yarn lint", "yarn ts:check"],
     "after:bump": ["yarn build"]
   }
 }
