@@ -39,7 +39,7 @@ describe('trace module', () => {
     expect(res.status).toBe(200);
   });
 
-  it.skip('should return the `bad request` response when the invalid result is sent', async () => {
+  it('should return the `bad request` response when the invalid result is sent', async () => {
     const { status, statusText } = await sendCustomProtobuf({
       invalidSpanKey: 4200,
       secondInvalidSpanKey: 3000

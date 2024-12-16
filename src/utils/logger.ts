@@ -22,10 +22,10 @@ import { FastifyReply, FastifyRequest } from 'fastify';
 import { Logger, LoggerOptions, pino } from 'pino';
 import { requestContext } from '@fastify/request-context';
 
-export function createLogger(
+export function createLoggerConfig(
   options?: Omit<LoggerOptions, 'name' | 'level' | 'timestamp'>
-): Logger {
-  return pino({
+): LoggerOptions {
+  return {
     ...options,
     name: 'bee-observe',
     level: process.env.LOG_LEVEL || 'info',
@@ -37,10 +37,10 @@ export function createLogger(
       },
       ...options?.formatters
     }
-  });
+  };
 }
 
-export const fastifyLogger = createLogger({
+export const fastifyLogger = createLoggerConfig({
   serializers: {
     req(request: FastifyRequest) {
       return {
@@ -72,7 +72,7 @@ export const LogLabels = {
   CORRELATION_ID: 'correlationId'
 } as const;
 
-const log = createLogger();
+const log = pino(createLoggerConfig());
 
 export const getLogger = () => {
   const request = requestContext.get('request');

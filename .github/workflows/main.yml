@@ -13,7 +13,7 @@ concurrency:
 jobs:
   main:
     timeout-minutes: 20
-    name: Lint & Build & Test
+    name: Lint & Format & CommitLint & Build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
