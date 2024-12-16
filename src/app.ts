@@ -19,6 +19,7 @@ import './utils/load-config.js';
 import Fastify from 'fastify';
 import { RequestContext } from '@mikro-orm/core';
 import { JsonSchemaToTsProvider } from '@fastify/type-provider-json-schema-to-ts';
+import compressPlugin from '@fastify/compress';
 
 import { initTerminus } from './utils/terminus.js';
 import { authPlugin } from './utils/auth.js';
@@ -65,6 +66,9 @@ export async function bootstrap({ port }: BootstrapOptions) {
     gracefulPeriod: process.env.NODE_ENV === 'production' ? 10000 : 0, // 10s in production
     timeout: 25000 // 25s
   });
+
+  // compress gzip (followed by https://opentelemetry.io/docs/specs/otlp/#protocol-details)
+  app.register(compressPlugin, { encodings: ['gzip'], customTypes: /x-protobuf$/ });
 
   // error
   app.register(errorPlugin);
