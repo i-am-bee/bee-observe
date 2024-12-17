@@ -19,6 +19,8 @@ import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import fp from 'fastify-plugin';
 import { StatusCodes } from 'http-status-codes';
 
+import { constants } from './constants.js';
+
 export enum ErrorWithPropsCodes {
   AUTH_ERROR = 'AUTH_ERROR',
   INTERNAL_SERVER_ERROR = 'INTERNAL_SERVER_ERROR',
@@ -29,20 +31,27 @@ export enum ErrorWithPropsCodes {
   TOO_MANY_REQUESTS = 'TOO_MANY_REQUESTS'
 }
 
+interface ErrorWithPropsConfig {
+  addRetryAfterHeader?: boolean;
+}
+
 export class ErrorWithProps<CODE extends ErrorWithPropsCodes, REASON extends string> extends Error {
   public readonly code: CODE;
   public readonly reason?: REASON;
   public readonly statusCode: StatusCodes;
+  public readonly config?: ErrorWithPropsConfig;
 
   constructor(
     message: string,
     { code, reason }: { code: CODE; reason?: REASON },
-    statusCode: StatusCodes
+    statusCode: StatusCodes,
+    config?: ErrorWithPropsConfig
   ) {
     super(message);
     this.code = code;
     this.reason = reason;
     this.statusCode = statusCode;
+    this.config = config;
   }
 
   toDto(): BaseErrorResponse {
@@ -64,9 +73,10 @@ export class MlflowError<
   constructor(
     message: string,
     { code, reason, response }: { code: CODE; reason?: REASON; response: RESPONSE },
-    statusCode: StatusCodes
+    statusCode: StatusCodes,
+    config?: ErrorWithPropsConfig
   ) {
-    super(message, { code, reason }, statusCode);
+    super(message, { code, reason }, statusCode, config);
     this.response = response;
   }
 
@@ -90,6 +100,18 @@ export const errorPlugin: FastifyPluginAsync = fp.default(async (app) => {
 
   app.setErrorHandler(function (error, request, reply) {
     if (error instanceof ErrorWithProps) {
+      if (
+        [
+          StatusCodes.SERVICE_UNAVAILABLE,
+          StatusCodes.TOO_MANY_REQUESTS,
+          StatusCodes.MOVED_PERMANENTLY
+        ].includes(error.statusCode)
+      ) {
+        reply.header('Retry-After', constants.RETRY_AFTER_SECONDS);
+      }
+      if (error.config?.addRetryAfterHeader) {
+        reply.header('Retry-After', constants.RETRY_AFTER_SECONDS);
+      }
       reply.status(error.statusCode).send(error.toDto());
     } else if (error instanceof SyntaxError) {
       // When request body cannot by parsed by ContentTypeParser

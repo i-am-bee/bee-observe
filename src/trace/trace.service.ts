@@ -70,7 +70,8 @@ export async function getTrace({
     throw new ErrorWithProps(
       `The trace entity with id ${id} does not exist`,
       { code: ErrorWithPropsCodes.NOT_FOUND },
-      StatusCodes.NOT_FOUND
+      StatusCodes.NOT_FOUND,
+      { addRetryAfterHeader: true }
     );
   }
 

@@ -32,6 +32,16 @@ export const buildUrl = (route: string): string => {
   return new URL(route, `http://127.0.0.1:${port}`).toString();
 };
 
+function parseRetryAfterHeader(retryAfter: string | null) {
+  if (!retryAfter) {
+    throw new Error('The "Retry-After" header is missing in the response');
+  }
+  if (!/^-?\d+$/.test(retryAfter)) {
+    throw new Error('The "Retry-After" has an invalid format. It must be an integer');
+  }
+  return parseInt(retryAfter);
+}
+
 const MLFLOW_MAX_RETREIVE_ATTEMPTS = 5;
 export async function waitForMlflowTrace({
   attempt = 1,
@@ -48,8 +58,15 @@ export async function waitForMlflowTrace({
   });
 
   const { result } = await traceResponse.json();
+
+  if (traceResponse.status === 404) {
+    const retryAfter = parseRetryAfterHeader(traceResponse.headers.get('Retry-After'));
+    await setTimeoutPromise(retryAfter * 1000);
+    return waitForMlflowTrace({ traceId, attempt: ++attempt });
+  }
+
   if (result?.mlflow?.step !== 'CLOSE_TRACE' && attempt <= MLFLOW_MAX_RETREIVE_ATTEMPTS) {
-    await setTimeoutPromise(500 * attempt);
+    await setTimeoutPromise(2000);
     return waitForMlflowTrace({ traceId, attempt: ++attempt });
   }
 

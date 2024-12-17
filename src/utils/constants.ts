@@ -64,6 +64,7 @@ export const constants = Object.freeze({
   FASTIFY_BODY_LIMIT: parseInt(process.env.FASTIFY_BODY_LIMIT || '10485760'), // default is 10 MB
   REDIS_URL,
   DATA_EXPIRATION_IN_DAYS: parseInt(process.env.DATA_EXPIRATION_IN_DAYS || '7'),
+  RETRY_AFTER_SECONDS: process.env.RETRY_AFTER_SECONDS || 2,
   MLFLOW: Object.freeze({
     API_URL: MLFLOW_API_URL,
     AUTHORIZATION: Object.freeze({
