@@ -39,6 +39,17 @@ describe('trace module', () => {
     expect(res.status).toBe(200);
   });
 
+  it('should use "Retry-After" header and wait until the trace is ready', async () => {
+    let retryAfterTraceId: string | undefined = undefined;
+    await agent.run({ prompt }).middleware((ctx) => (retryAfterTraceId = ctx.emitter.trace?.id));
+    if (retryAfterTraceId) await waitForMlflowTrace({ traceId: retryAfterTraceId });
+
+    const traceResponse = await makeRequest({ route: `v1/traces/${retryAfterTraceId}` });
+
+    // assert it was successful response
+    expect(traceResponse.status).toBe(200);
+  });
+
   it('should return the `bad request` response when the invalid result is sent', async () => {
     const { status, statusText } = await sendCustomProtobuf({
       invalidSpanKey: 4200,
