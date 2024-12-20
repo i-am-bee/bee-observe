@@ -16,8 +16,8 @@
 
 import { Long } from '@grpc/proto-loader';
 
-import { Span__Output } from '../types/generated/opentelemetry/proto/trace/v1/Span.js';
 import { MainSpan } from '../types/internal/span.js';
+import type { Span__Output } from '../types/open-telemetry/generated.js';
 
 import { Span } from './span.document.js';
 

@@ -19,8 +19,7 @@ import { ObjectId } from '@mikro-orm/mongodb';
 
 import { BaseDocument } from '../utils/base.document.js';
 import { Trace } from '../trace/trace.document.js';
-import type { Span__Output } from '../types/generated/opentelemetry/proto/trace/v1/Span.js';
-import { _opentelemetry_proto_trace_v1_Status_StatusCode } from '../types/generated/opentelemetry/proto/trace/v1/Status.js';
+import type { Span__Output } from '../types/open-telemetry/generated.js';
 
 import { SpanDto } from './span.dto.js';
 import { getAttributeValue, uint8ArrayToHexString, unixNanoToDate } from './utilt.js';
