@@ -23,10 +23,10 @@ import { ORM } from '../utils/db.js';
 import { ErrorWithProps, ErrorWithPropsCodes } from '../utils/error.js';
 import { addMlflowTraceToQueue } from '../mlflow/queue/mlflow-trace-create.queue.js';
 import { Span } from '../span/span.document.js';
-import { ExportTraceServiceRequest__Output } from '../types/generated/opentelemetry/proto/collector/trace/v1/ExportTraceServiceRequest.js';
 import { findMainSpan } from '../span/utilt.js';
 import { getServiceLogger } from '../utils/logger-factories.js';
 import { constants } from '../utils/constants.js';
+import type { ExportTraceServiceRequest__Output } from '../types/open-telemetry/generated.js';
 
 import { TraceDto, TraceGetOneQuery, TraceGetQuery } from './trace.dto.js';
 import { assemblyTrace } from './utils/assembly-trace.js';

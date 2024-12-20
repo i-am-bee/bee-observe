@@ -18,9 +18,8 @@ import { FastifyPluginAsyncJsonSchemaToTs } from '@fastify/type-provider-json-sc
 import { StatusCodes } from 'http-status-codes';
 
 import { withResultsResponse, withResultResponse, Tags } from '../utils/swagger.js';
-import { ExportTraceServiceRequest__Output } from '../types/generated/opentelemetry/proto/collector/trace/v1/ExportTraceServiceRequest.js';
 import { getModuleLogger } from '../utils/logger-factories.js';
-import { constants } from '../utils/constants.js';
+import type { ExportTraceServiceRequest__Output } from '../types/open-telemetry/generated.js';
 
 import {
   traceSchema,

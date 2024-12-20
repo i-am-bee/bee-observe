@@ -14,17 +14,29 @@
  * limitations under the License.
  */
 
-import { Span } from '../../span/span.document.js';
+import { defineConfig } from 'tsup';
+import fs from 'node:fs';
 
-export type MainSpan = Omit<Span, 'attributes'> & {
-  attributes: Omit<
-    Span['attributes'],
-    'history' | 'response' | 'prompt' | 'traceId' | 'version'
-  > & {
-    version: NonNullable<Span['attributes']['version']>;
-    history: NonNullable<Span['attributes']['history']>;
-    prompt: NonNullable<Span['attributes']['prompt']>;
-    traceId: NonNullable<Span['attributes']['traceId']>;
-    response: NonNullable<Span['attributes']['response']>;
-  };
-};
+if (!process.env.ENTRY) {
+  throw new Error(`Entry file was not provided!`);
+}
+const target = `types/${process.env.ENTRY}.ts`;
+await fs.promises.writeFile(
+  target,
+  [`export { ProtoGrpcType } from './trace_service.js'`].join('\n')
+);
+
+export default defineConfig({
+  entry: [target],
+  tsconfig: './tsconfig.proto.json',
+  sourcemap: false,
+  dts: true,
+  format: ['esm'],
+  treeshake: true,
+  legacyOutput: false,
+  skipNodeModulesBundle: true,
+  bundle: true,
+  splitting: false,
+  silent: false,
+  clean: true
+});
