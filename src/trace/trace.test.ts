@@ -17,7 +17,12 @@
 import { expect, it, describe, beforeAll, afterAll } from 'vitest';
 
 import { sdk, spanTraceExporterProcessor } from '../testing/telemetry.js';
-import { agent, makeRequest, sendCustomProtobuf, waitForMlflowTrace } from '../testing/utils.js';
+import {
+  generateTrace,
+  makeRequest,
+  sendCustomProtobuf,
+  waitForMlflowTrace
+} from '../testing/utils.js';
 
 let traceId: string | undefined = undefined;
 const prompt = 'hello';
@@ -25,7 +30,7 @@ const prompt = 'hello';
 describe('trace module', () => {
   beforeAll(async () => {
     await sdk.start();
-    await agent.run({ prompt }).middleware((ctx) => (traceId = ctx.emitter.trace?.id));
+    traceId = await generateTrace({ prompt });
     await spanTraceExporterProcessor.forceFlush();
     if (traceId) await waitForMlflowTrace({ traceId });
   });
@@ -41,7 +46,7 @@ describe('trace module', () => {
 
   it('should use "Retry-After" header and wait until the trace is ready', async () => {
     let retryAfterTraceId: string | undefined = undefined;
-    await agent.run({ prompt }).middleware((ctx) => (retryAfterTraceId = ctx.emitter.trace?.id));
+    retryAfterTraceId = await generateTrace({ prompt });
     if (retryAfterTraceId) await waitForMlflowTrace({ traceId: retryAfterTraceId });
 
     const traceResponse = await makeRequest({ route: `v1/traces/${retryAfterTraceId}` });

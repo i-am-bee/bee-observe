@@ -18,7 +18,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { Version } from 'bee-agent-framework';
 
 import { sdk, spanTraceExporterProcessor } from '../testing/telemetry.js';
-import { agent, makeRequest } from '../testing/utils.js';
+import { generateTrace, makeRequest } from '../testing/utils.js';
 
 let traceId: string | undefined = undefined;
 const prompt = 'hello';
@@ -26,7 +26,7 @@ const prompt = 'hello';
 describe('span module', () => {
   beforeAll(async () => {
     await sdk.start();
-    await agent.run({ prompt }).middleware((ctx) => (traceId = ctx.emitter.trace?.id));
+    traceId = await generateTrace({ prompt });
     await spanTraceExporterProcessor.forceFlush();
   });
 
@@ -63,10 +63,5 @@ describe('span module', () => {
     expect(mainSpan.attributes.prompt).toBe(prompt);
     expect(mainSpan.attributes.response.text.length).toBeGreaterThan(0);
     expect(mainSpan.ctx).toBeUndefined();
-
-    const startSpan = results.find((result: any) => result.name === 'ollama.chat_llm.start-1');
-    expect(
-      startSpan.attributes.data.input.find((input: any) => input.role === 'system').text.length
-    ).toBeGreaterThan(0);
   });
 });

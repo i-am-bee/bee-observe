@@ -1,0 +1,49 @@
+name: Integration Test
+
+on:
+  push:
+    branches: ['main']
+  pull_request:
+    branches: ['main']
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  main:
+    timeout-minutes: 20
+    name: Integration Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Enable Corepack
+        run: corepack enable
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'yarn'
+      - name: Install dependencies
+        run: yarn install
+      - name: Copy .env file
+        run: cp .env.testing.docker .env
+      - name: Build infra
+        run: docker compose build
+      - name: Build Observe API
+        run: docker compose build
+      - name: Run Observe API
+        run: docker compose up -d
+      - name: List running containers
+        run: docker ps
+      - name: Run Vitest
+        run: yarn run vitest --run
+      - name: Collect Logs on Failure (Observe)
+        if: failure()
+        run: docker compose logs
+      - name: Cleanup
+        if: always()
+        run: docker compose down

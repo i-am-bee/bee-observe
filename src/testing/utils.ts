@@ -16,6 +16,7 @@
 
 import { setTimeout as setTimeoutPromise } from 'node:timers/promises';
 
+import { api } from '@opentelemetry/sdk-node';
 import { BeeAgent } from 'bee-agent-framework/agents/bee/agent';
 import { TokenMemory } from 'bee-agent-framework/memory/tokenMemory';
 import { DuckDuckGoSearchTool } from 'bee-agent-framework/tools/search/duckDuckGoSearch';
@@ -23,6 +24,7 @@ import { WikipediaTool } from 'bee-agent-framework/tools/search/wikipedia';
 import { OpenMeteoTool } from 'bee-agent-framework/tools/weather/openMeteo';
 import { OllamaChatLLM } from 'bee-agent-framework/adapters/ollama/chat';
 import protobuf from 'protobufjs';
+import { Version } from 'bee-agent-framework';
 
 import { TraceDto } from '../trace/trace.dto.js';
 import { constants } from '../utils/constants.js';
@@ -130,4 +132,65 @@ export async function sendCustomProtobuf(payload: SendCustomProtobufProps) {
     },
     body: buffer
   });
+}
+
+const fakeSpans = [
+  {
+    id: 'fake-1',
+    target: 'groupId',
+    name: 'iteration-1'
+  }
+];
+
+export async function generateTrace({ prompt }: { prompt: string }) {
+  let traceId: string | undefined = undefined;
+  // bee-agent-framework
+  if (!process.env.USE_FAKE_BACKEND_FOR_TESTING) {
+    await agent.run({ prompt }).middleware((ctx) => (traceId = ctx.emitter.trace?.id));
+    return traceId;
+  }
+
+  // mock
+  const tracer = api.trace.getTracer('bee-agent-framework', Version);
+  traceId = 'ea215b9f';
+
+  // 1) main span
+  tracer.startActiveSpan(
+    `bee-agent-framework-BeeAgent-${traceId}`,
+    {
+      attributes: {
+        traceId,
+        version: Version,
+        prompt,
+        response: JSON.stringify({
+          role: 'assistant',
+          text: "Hello! It's nice to chat with you."
+        })
+      }
+    },
+    (activeSpan) => {
+      activeSpan.setStatus({ code: 1 });
+
+      // 2) nested spans
+      fakeSpans.map((span) => {
+        tracer.startActiveSpan(
+          span.id,
+          {
+            attributes: {
+              target: span.target,
+              name: span.name
+            }
+          },
+          (nestedSpan) => {
+            nestedSpan.setStatus({ code: 1 });
+            nestedSpan.end();
+          }
+        );
+      });
+
+      activeSpan.end();
+    }
+  );
+
+  return traceId;
 }
