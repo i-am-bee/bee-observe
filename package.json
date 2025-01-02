@@ -2,12 +2,16 @@
   "name": "bee-observe",
   "packageManager": "yarn@4.3.1",
   "version": "0.0.5",
+  "author": "IBM Corp.",
+  "contributors": [
+    "Milan Gallas <milan.gallas@ibm.com>"
+  ],
   "license": "Apache-2.0",
   "description": "Observability API server for bee-agent-framework",
   "type": "module",
   "scripts": {
     "build": "rm -rf dist && tsc && cp -R src/protos dist/protos",
-    "proto:generate": "proto-loader-gen-types --defaults --oneofs --longs=Number --enums=String --grpcLib=@grpc/grpc-js --outDir=./src/types/generated ./src/protos/*.proto && node scripts/add_js_extensions.js",
+    "proto:generate": "./scripts/open_telemetry_generate_protos/generate_protos.sh",
     "start:infra": "docker compose -f compose-before.yml up -d mongo redis mlflow",
     "start:dev": "tsx watch ./src/index.ts | pino-pretty --singleLine",
     "stop:infra": "docker compose -f compose-before.yml down",
@@ -54,6 +58,7 @@
     "prettier": "^3.3.2",
     "release-it": "^17.6.0",
     "ts-node": "^10.9.2",
+    "tsup": "^8.3.5",
     "tsx": "^4.11.0",
     "typescript": "^5.4.5",
     "typescript-eslint": "^7.13.0",
