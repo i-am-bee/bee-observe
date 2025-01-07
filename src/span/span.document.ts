@@ -54,7 +54,7 @@ export class Span extends BaseDocument {
   attributes!: SpanDto['attributes'];
 
   @ManyToOne()
-  trace!: Ref<Trace>;
+  trace?: Ref<Trace>;
 
   constructor(input: Span__Output) {
     super(new ObjectId());

@@ -43,6 +43,8 @@ export function getAttributeValue({
   return attributes.find((attr) => attr.key === key)?.value?.stringValue;
 }
 
-export function findMainSpan(spans: Span[]): MainSpan | undefined {
-  return spans.find((span) => !span.parentId && span.attributes.traceId) as MainSpan | undefined;
+export function filterMainSpans(spans: Span[]): MainSpan[] {
+  return spans.filter(
+    (span) => span.attributes.traceId && span.name.includes('bee-agent-framework')
+  ) as MainSpan[];
 }

@@ -31,9 +31,9 @@ jobs:
         run: yarn install
       - name: Copy .env file
         run: cp .env.testing.docker .env
-      - name: Build infra
-        run: docker compose build
-      - name: Build Observe API
+      - name: Pull images
+        run: docker compose pull
+      - name: Build images
         run: docker compose build
       - name: Run Observe API
         run: docker compose up -d
