@@ -18,6 +18,7 @@ import { Long } from '@grpc/proto-loader';
 
 import { MainSpan } from '../types/internal/span.js';
 import type { Span__Output } from '../types/open-telemetry/generated.js';
+import { constants } from '../utils/constants.js';
 
 import { Span } from './span.document.js';
 
@@ -45,6 +46,7 @@ export function getAttributeValue({
 
 export function filterMainSpans(spans: Span[]): MainSpan[] {
   return spans.filter(
-    (span) => span.attributes.traceId && span.name.includes('bee-agent-framework')
+    (span) =>
+      span.attributes.traceId && span.name.includes(constants.OPENTELEMETRY.INSTRUMENTATION_SCOPE)
   ) as MainSpan[];
 }

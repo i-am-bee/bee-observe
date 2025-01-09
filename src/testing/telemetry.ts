@@ -30,7 +30,7 @@ const traceExporter = new OTLPTraceExporter({
 });
 
 const resource = new resources.Resource({
-  [ATTR_SERVICE_NAME]: 'bee-agent-framework',
+  [ATTR_SERVICE_NAME]: constants.OPENTELEMETRY.INSTRUMENTATION_SCOPE,
   [ATTR_SERVICE_VERSION]: '0.0.1'
 });
 

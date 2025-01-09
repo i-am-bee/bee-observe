@@ -156,7 +156,7 @@ export async function generateTrace({ prompt }: { prompt: string }) {
   }
 
   // mock
-  const tracer = api.trace.getTracer('bee-agent-framework', Version);
+  const tracer = api.trace.getTracer(constants.OPENTELEMETRY.INSTRUMENTATION_SCOPE, Version);
   traceId = Math.random().toString(16).slice(2, 10);
 
   // 1) main span
