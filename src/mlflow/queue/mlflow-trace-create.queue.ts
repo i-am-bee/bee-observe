@@ -113,6 +113,11 @@ const { queue } = createQueue({
   }
 });
 
-export function addMlflowTraceToQueue(input: JobInput) {
-  queue.add(QueueName['mlflow-trace-create'], input);
+export function addMlflowTracesToQueue(jobInputs: JobInput[]) {
+  queue.addBulk(
+    jobInputs.map((jobInput) => ({
+      name: QueueName['mlflow-trace-create'],
+      data: jobInput
+    }))
+  );
 }

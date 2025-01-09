@@ -18,7 +18,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { Version } from 'bee-agent-framework';
 
 import { sdk, spanTraceExporterProcessor } from '../testing/telemetry.js';
-import { generateTrace, makeRequest } from '../testing/utils.js';
+import { generateTrace, makeRequest, waitForTrace } from '../testing/utils.js';
 
 let traceId: string | undefined = undefined;
 const prompt = 'hello';
@@ -28,6 +28,7 @@ describe('span module', () => {
     await sdk.start();
     traceId = await generateTrace({ prompt });
     await spanTraceExporterProcessor.forceFlush();
+    if (traceId) await waitForTrace({ traceId, includeMlflow: true });
   });
 
   afterAll(async () => {

@@ -111,32 +111,37 @@ export const errorPlugin: FastifyPluginAsync = fp.default(async (app) => {
       }
       if (error.config?.addRetryAfterHeader) {
         reply.header('Retry-After', constants.RETRY_AFTER_SECONDS);
+      } else {
+        this.log.error(error);
       }
       reply.status(error.statusCode).send(error.toDto());
     } else if (error instanceof SyntaxError) {
+      this.log.error(error);
       // When request body cannot by parsed by ContentTypeParser
       reply.status(StatusCodes.BAD_REQUEST).send({
         code: ErrorWithPropsCodes.INVALID_ARGUMENT,
         message: 'An unspecified syntax error occurred'
       });
     } else if ('validation' in error && error.statusCode === StatusCodes.BAD_REQUEST) {
+      this.log.error(error);
       // This is ajv validation error
       reply.status(StatusCodes.BAD_REQUEST).send({
         code: ErrorWithPropsCodes.INVALID_ARGUMENT,
         message: error.message
       });
     } else if (error.statusCode) {
+      this.log.error(error);
       reply.status(error.statusCode).send({
         code: error.code,
         message: error.message
       });
     } else {
+      this.log.error(error);
       reply.status(StatusCodes.INTERNAL_SERVER_ERROR).send({
         code: ErrorWithPropsCodes.INTERNAL_SERVER_ERROR,
         message: 'An unspecified error occurred'
       });
     }
-    this.log.error(error);
   });
 });
 

@@ -1,0 +1,36 @@
+receivers:
+  otlp:
+    protocols:
+      http:
+        endpoint: 0.0.0.0:4318
+
+exporters:
+  debug: {}
+  otlphttp/observe:
+    endpoint: http://127.0.0.1:4319
+    tls:
+      insecure: true
+    headers:
+      x-bee-authorization: 'valid-api-key'
+
+extensions:
+  health_check:
+    endpoint: http://127.0.0.1:13133
+
+processors:
+  batch: {}
+  filter/observe:
+    traces:
+      span:
+        - instrumentation_scope.name != "bee-agent-framework"
+  memory_limiter:
+    check_interval: 5s
+    limit_percentage: 80
+    spike_limit_percentage: 25
+
+service:
+  pipelines:
+    traces/observe:
+      receivers: [otlp]
+      processors: [filter/observe, memory_limiter, batch]
+      exporters: [debug, otlphttp/observe]

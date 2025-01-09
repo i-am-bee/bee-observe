@@ -30,8 +30,7 @@ import { TraceDto } from '../trace/trace.dto.js';
 import { constants } from '../utils/constants.js';
 
 export const buildUrl = (route: string): string => {
-  const port = process.env.PORT || '4318';
-  return new URL(route, `http://127.0.0.1:${port}`).toString();
+  return new URL(route, `http://127.0.0.1:${process.env.PORT || '4318'}`).toString();
 };
 
 function parseRetryAfterHeader(retryAfter: string | null) {
@@ -45,31 +44,37 @@ function parseRetryAfterHeader(retryAfter: string | null) {
 }
 
 const MLFLOW_MAX_RETREIVE_ATTEMPTS = 5;
-export async function waitForMlflowTrace({
-  attempt = 1,
-  traceId
-}: {
+interface WaitForTraceProps {
   attempt?: number;
   traceId: string;
-}): Promise<{
+  includeMlflow?: boolean;
+}
+interface WaitForTraceResponse {
   status: number;
   result: TraceDto;
-}> {
-  const traceResponse = await makeRequest({
-    route: `v1/traces/${traceId}?include_mlflow=true&include_tree=true&include_mlflow_tree=true`
-  });
+}
+
+export async function waitForTrace({
+  attempt = 1,
+  traceId,
+  includeMlflow = false
+}: WaitForTraceProps): Promise<WaitForTraceResponse> {
+  const route = includeMlflow
+    ? `v1/traces/${traceId}?include_mlflow=true&include_tree=true&include_mlflow_tree=true`
+    : `v1/traces/${traceId}`;
+  const traceResponse = await makeRequest({ route });
 
   const { result } = await traceResponse.json();
 
-  if (traceResponse.status === 404) {
+  if (traceResponse.status === 404 && attempt <= MLFLOW_MAX_RETREIVE_ATTEMPTS) {
     const retryAfter = parseRetryAfterHeader(traceResponse.headers.get('Retry-After'));
     await setTimeoutPromise(retryAfter * 1000);
-    return waitForMlflowTrace({ traceId, attempt: ++attempt });
+    return waitForTrace({ traceId, attempt: ++attempt });
   }
 
   if (result?.mlflow?.step !== 'CLOSE_TRACE' && attempt <= MLFLOW_MAX_RETREIVE_ATTEMPTS) {
     await setTimeoutPromise(2000);
-    return waitForMlflowTrace({ traceId, attempt: ++attempt });
+    return waitForTrace({ traceId, attempt: ++attempt });
   }
 
   return {
@@ -151,8 +156,8 @@ export async function generateTrace({ prompt }: { prompt: string }) {
   }
 
   // mock
-  const tracer = api.trace.getTracer('bee-agent-framework', Version);
-  traceId = 'ea215b9f';
+  const tracer = api.trace.getTracer(constants.OPENTELEMETRY.INSTRUMENTATION_SCOPE, Version);
+  traceId = Math.random().toString(16).slice(2, 10);
 
   // 1) main span
   tracer.startActiveSpan(

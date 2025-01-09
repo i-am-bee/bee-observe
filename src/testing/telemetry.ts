@@ -20,22 +20,45 @@ import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
 
 import { constants } from '../utils/constants.js';
-
-import { buildUrl } from './utils.js';
+import { buildUrl } from '../mlflow/utils/api/utils/build-url.js';
 
 const traceExporter = new OTLPTraceExporter({
-  url: buildUrl('v1/traces'),
   headers: {
     [constants.BEE_AUTH_HEADER]: constants.AUTH_KEY
   },
   timeoutMillis: 120_000
 });
-export const spanTraceExporterProcessor = new node.BatchSpanProcessor(traceExporter);
 
+const resource = new resources.Resource({
+  [ATTR_SERVICE_NAME]: constants.OPENTELEMETRY.INSTRUMENTATION_SCOPE,
+  [ATTR_SERVICE_VERSION]: '0.0.1'
+});
+
+// main sdk with the default BatchSpanProcessor and the Collector backend
+export const spanTraceExporterProcessor = new node.BatchSpanProcessor(traceExporter);
 export const sdk = new NodeSDK({
-  resource: new resources.Resource({
-    [ATTR_SERVICE_NAME]: 'bee-agent-framework',
-    [ATTR_SERVICE_VERSION]: '0.0.1'
-  }),
+  resource,
   spanProcessors: [spanTraceExporterProcessor]
+});
+
+// sdk with the SimpleSpanProcessor and the Collector backend
+export const sdkWithSimpleProcessor = new NodeSDK({
+  resource,
+  spanProcessors: [new node.SimpleSpanProcessor(traceExporter)]
+});
+
+// sdk with the SimpleSpanProcessor and direct Observe backend
+export const sdkWithSimpleProcessorAndObserveBackend = new NodeSDK({
+  resource,
+  spanProcessors: [
+    new node.SimpleSpanProcessor(
+      new OTLPTraceExporter({
+        url: buildUrl('v1/traces'),
+        headers: {
+          [constants.BEE_AUTH_HEADER]: constants.AUTH_KEY
+        },
+        timeoutMillis: 120_000
+      })
+    )
+  ]
 });

@@ -15,10 +15,13 @@
  */
 
 import { QueryOrderNumeric } from '@mikro-orm/mongodb';
+import * as semver from 'semver';
 
 import { isValidFrameworkId, ORM } from '../utils/db.js';
+import { constants } from '../utils/constants.js';
 
 import { SpanDto, SpanGetOneParams, SpanGetOneQuery } from './span.dto.js';
+import { Span } from './span.document.js';
 
 export async function getSpans(props: SpanGetOneParams & SpanGetOneQuery): Promise<{
   totalCount: number;
@@ -46,4 +49,24 @@ export async function getSpans(props: SpanGetOneParams & SpanGetOneQuery): Promi
     totalCount,
     spans: spans.map((span) => span.toTelemetry(props))
   };
+}
+
+export async function loadAllNestedSpans(span: Span): Promise<Span[]> {
+  const { version } = span.attributes;
+  // Optimised query = use the traceId for loading all nested spans
+  if (
+    version &&
+    semver.valid(version) &&
+    semver.gte(version, constants.FRAMEWORK_BRAKING_CHANGES.TRACE_ID_FOR_EACH_SPAN)
+  ) {
+    return ORM.span.find({ attributes: { traceId: span.attributes.traceId } });
+  }
+
+  // The old temporary way (will be removed soon)
+  const spans = await ORM.span.find({ parentId: span.context.spanId });
+  if (spans.length === 0) return spans;
+
+  const nestedSpans = await Promise.all(spans.map((span) => loadAllNestedSpans(span)));
+
+  return [...spans, ...nestedSpans.flat()];
 }

@@ -21,9 +21,9 @@ import { FastifyRequest } from 'fastify';
 
 import { ORM } from '../utils/db.js';
 import { ErrorWithProps, ErrorWithPropsCodes } from '../utils/error.js';
-import { addMlflowTraceToQueue } from '../mlflow/queue/mlflow-trace-create.queue.js';
+import { addMlflowTracesToQueue } from '../mlflow/queue/mlflow-trace-create.queue.js';
 import { Span } from '../span/span.document.js';
-import { findMainSpan } from '../span/utilt.js';
+import { filterMainSpans } from '../span/utilt.js';
 import { getServiceLogger } from '../utils/logger-factories.js';
 import { constants } from '../utils/constants.js';
 import type { ExportTraceServiceRequest__Output } from '../types/open-telemetry/generated.js';
@@ -97,36 +97,36 @@ export async function createTrace(traceBody: ExportTraceServiceRequest__Output):
     return;
   }
 
-  const mainSpan = findMainSpan(spans);
-  if (!mainSpan) {
-    throw new ErrorWithProps(
-      `The root span does not exist`,
-      { code: ErrorWithPropsCodes.INVALID_ARGUMENT },
-      StatusCodes.BAD_REQUEST
+  // save all spans from framework
+  await ORM.em.persistAndFlush(spans);
+
+  // build traces
+  const mainSpans = filterMainSpans(spans);
+  if (mainSpans.length > 0) {
+    // create traces
+    const traces = await Promise.all(
+      mainSpans.map((mainSpan) =>
+        assemblyTrace({
+          mainSpan: mainSpan,
+          traceId: mainSpan.attributes.traceId,
+          request: {
+            message: mainSpan.attributes.prompt,
+            history: mainSpan.attributes.history,
+            framework: { version: mainSpan.attributes.version }
+          },
+          response: mainSpan.attributes.response,
+          startTime: mainSpan.startTime,
+          endTime: mainSpan.endTime
+        })
+      )
     );
+
+    // save traces
+    await ORM.em.persistAndFlush(traces);
+
+    // mlflow processing
+    addMlflowTracesToQueue(traces.map((trace) => ({ traceId: trace.id })));
   }
-  const { traceId } = mainSpan.attributes;
-
-  const trace = assemblyTrace({
-    spans,
-    traceId,
-    request: {
-      message: mainSpan.attributes.prompt,
-      history: mainSpan.attributes.history,
-      framework: { version: mainSpan.attributes.version }
-    },
-    response: mainSpan.attributes.response,
-    startTime: mainSpan.startTime,
-    endTime: mainSpan.endTime
-  });
-
-  // save trace
-  await ORM.em.persistAndFlush(trace);
-
-  // mlflow processing
-  addMlflowTraceToQueue({
-    traceId: trace.id
-  });
 }
 
 export function traceProtobufBufferParser(

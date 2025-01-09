@@ -18,6 +18,7 @@ import { Long } from '@grpc/proto-loader';
 
 import { MainSpan } from '../types/internal/span.js';
 import type { Span__Output } from '../types/open-telemetry/generated.js';
+import { constants } from '../utils/constants.js';
 
 import { Span } from './span.document.js';
 
@@ -43,6 +44,9 @@ export function getAttributeValue({
   return attributes.find((attr) => attr.key === key)?.value?.stringValue;
 }
 
-export function findMainSpan(spans: Span[]): MainSpan | undefined {
-  return spans.find((span) => !span.parentId && span.attributes.traceId) as MainSpan | undefined;
+export function filterMainSpans(spans: Span[]): MainSpan[] {
+  return spans.filter(
+    (span) =>
+      span.attributes.traceId && span.name.includes(constants.OPENTELEMETRY.INSTRUMENTATION_SCOPE)
+  ) as MainSpan[];
 }

@@ -15,6 +15,8 @@
  */
 
 import { Span, SpanInput } from '../../span/span.document.js';
+import { loadAllNestedSpans } from '../../span/span.service.js';
+import { MainSpan } from '../../types/internal/span.js';
 import { Trace } from '../trace.document.js';
 import { TraceRequest } from '../trace.dto.js';
 
@@ -114,7 +116,7 @@ const groupBy = (spans: TraceSpanWithChildren[]): TreeItem[] => {
 };
 
 interface AssemblyTraceProps {
-  spans: Span[];
+  mainSpan: MainSpan;
   traceId: string;
   request: TraceRequest;
   response?: any;
@@ -122,14 +124,17 @@ interface AssemblyTraceProps {
   endTime: Date;
 }
 
-export function assemblyTrace({
-  spans,
+export async function assemblyTrace({
   traceId,
   request,
   response,
   startTime,
-  endTime
-}: AssemblyTraceProps): Trace {
+  endTime,
+  mainSpan
+}: AssemblyTraceProps): Promise<Trace> {
+  const nestedSpans = await loadAllNestedSpans(mainSpan);
+  const spans = [mainSpan, ...nestedSpans];
+
   const eventsTree = groupBy(
     spans
       .filter((span) => !span.parentId)
