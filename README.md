@@ -12,6 +12,8 @@
 
 `Bee Observe` is a REST API with OpenAPI documentation designed to collect information about `bee-agent-framework` events in the Opentelemetry format and save them as a Trace entity with additional information about `request`, `response` etc. to a **MongoDB** database. This app is built using the **Fastify** framework.
 
+<img alt="Observe architecture diagram" src="./docs/assets/Observe_architecture_diagram.png">
+
 ## Table of Contents
 
 1. [👩‍💻 Get started with Observe](#-get-started-with-observe)
