@@ -59,7 +59,10 @@ export async function loadAllNestedSpans(span: Span): Promise<Span[]> {
     semver.valid(version) &&
     semver.gte(version, constants.FRAMEWORK_BRAKING_CHANGES.TRACE_ID_FOR_EACH_SPAN)
   ) {
-    return ORM.span.find({ attributes: { traceId: span.attributes.traceId } });
+    return ORM.span.find({
+      'attributes.traceId': span.attributes.traceId,
+      'context.spanId': { $ne: span.context.spanId }
+    } as any);
   }
 
   // The old temporary way (will be removed soon)

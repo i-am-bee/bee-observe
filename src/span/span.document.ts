@@ -22,7 +22,7 @@ import { Trace } from '../trace/trace.document.js';
 import type { Span__Output } from '../types/open-telemetry/generated.js';
 
 import { SpanDto } from './span.dto.js';
-import { getAttributeValue, uint8ArrayToHexString, unixNanoToDate } from './utilt.js';
+import { getAttributeValue, isMainSpan, uint8ArrayToHexString, unixNanoToDate } from './utilt.js';
 
 // this entity represents https://opentelemetry.io/docs/concepts/signals/traces/#spans
 @Entity()
@@ -94,7 +94,7 @@ export class Span extends BaseDocument {
 
     return {
       name: span.name,
-      parentId: !traceId
+      parentId: !isMainSpan(span)
         ? span.parentSpanId && uint8ArrayToHexString(span.parentSpanId)
         : undefined,
       startTime: unixNanoToDate(span.startTimeUnixNano as any),

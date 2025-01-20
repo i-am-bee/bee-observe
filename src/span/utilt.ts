@@ -44,9 +44,10 @@ export function getAttributeValue({
   return attributes.find((attr) => attr.key === key)?.value?.stringValue;
 }
 
+export function isMainSpan(span: Span | Span__Output) {
+  return span.name.includes(constants.OPENTELEMETRY.INSTRUMENTATION_SCOPE);
+}
+
 export function filterMainSpans(spans: Span[]): MainSpan[] {
-  return spans.filter(
-    (span) =>
-      span.attributes.traceId && span.name.includes(constants.OPENTELEMETRY.INSTRUMENTATION_SCOPE)
-  ) as MainSpan[];
+  return spans.filter((span) => span.attributes.traceId && isMainSpan(span)) as MainSpan[];
 }
