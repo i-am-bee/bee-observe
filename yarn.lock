@@ -116,13 +116,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@bufbuild/protobuf@npm:^1.10.0":
-  version: 1.10.0
-  resolution: "@bufbuild/protobuf@npm:1.10.0"
-  checksum: 10c0/5487b9c2e63846d0e3bde4d025cc77ae44a22166a5d6c184df0da5581e1ab6d66dd115af0ccad814576dcd011bb1b93989fb0ac1eb4ae452979bb8b186693ba0
-  languageName: node
-  linkType: hard
-
 "@commitlint/cli@npm:^19.5.0":
   version: 19.5.0
   resolution: "@commitlint/cli@npm:19.5.0"
@@ -311,27 +304,6 @@ __metadata:
     "@types/conventional-commits-parser": "npm:^5.0.0"
     chalk: "npm:^5.3.0"
   checksum: 10c0/f4a93992f43b23cd5af200c69bb73227fdc0f78a6f7ebcda73dad10d558c1ac66ff164aa6dc3c2ddb322c9ed8b1a89b05f458e40d7c440a0358f435d2d71c2df
-  languageName: node
-  linkType: hard
-
-"@connectrpc/connect-node@npm:^1.6.1":
-  version: 1.6.1
-  resolution: "@connectrpc/connect-node@npm:1.6.1"
-  dependencies:
-    undici: "npm:^5.28.4"
-  peerDependencies:
-    "@bufbuild/protobuf": ^1.10.0
-    "@connectrpc/connect": 1.6.1
-  checksum: 10c0/9891bbbe5ec155d16141e378c120dd6d4c47e1517656d4676aca762d70426a9eb3d9ec92595a7cfc4f5cbe40ff5be572d0c3d9010058107854e7f62ee05fb46e
-  languageName: node
-  linkType: hard
-
-"@connectrpc/connect@npm:^1.4.0, @connectrpc/connect@npm:^1.6.1":
-  version: 1.6.1
-  resolution: "@connectrpc/connect@npm:1.6.1"
-  peerDependencies:
-    "@bufbuild/protobuf": ^1.10.0
-  checksum: 10c0/35c6fd3e33c3a1ff9dce230b059ecd7991ef0dc60c16fb898e5c46b930a01077ac0b34d53d6742cc8ed079f20f8eacc7c77a8620aeec9efaf68950494f387011
   languageName: node
   linkType: hard
 
@@ -740,13 +712,6 @@ __metadata:
     fastify-plugin: "npm:^5.0.0"
     reusify: "npm:^1.0.4"
   checksum: 10c0/cbd6b135e9290813ee38fc524614fb916ba7f8835b72de9df37bede4dca480514044b59132879a8103691083c3acb8fdd58a6cb3351d362eff293c25e68f8ee7
-  languageName: node
-  linkType: hard
-
-"@fastify/busboy@npm:^2.0.0":
-  version: 2.1.1
-  resolution: "@fastify/busboy@npm:2.1.1"
-  checksum: 10c0/6f8027a8cba7f8f7b736718b013f5a38c0476eea67034c94a0d3c375e2b114366ad4419e6a6fa7ffc2ef9c6d3e0435d76dd584a7a1cbac23962fda7650b579e3
   languageName: node
   linkType: hard
 
@@ -3119,19 +3084,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bee-agent-framework@npm:^0.0.52":
-  version: 0.0.52
-  resolution: "bee-agent-framework@npm:0.0.52"
+"bee-agent-framework@npm:^0.0.57":
+  version: 0.0.57
+  resolution: "bee-agent-framework@npm:0.0.57"
   dependencies:
     "@ai-zen/node-fetch-event-source": "npm:^2.1.4"
-    "@connectrpc/connect": "npm:^1.6.1"
-    "@connectrpc/connect-node": "npm:^1.6.1"
     "@opentelemetry/api": "npm:^1.9.0"
     "@streamparser/json": "npm:^0.0.21"
     ajv: "npm:^8.17.1"
     ajv-formats: "npm:^3.0.1"
-    bee-proto: "npm:0.0.2"
-    duck-duck-scrape: "npm:^2.2.6"
+    duck-duck-scrape: "npm:^2.2.7"
     fast-xml-parser: "npm:^4.5.0"
     header-generator: "npm:^2.1.57"
     joplin-turndown-plugin-gfm: "npm:^1.0.12"
@@ -3141,7 +3103,7 @@ __metadata:
     mathjs: "npm:^14.0.0"
     mustache: "npm:^4.2.0"
     object-hash: "npm:^3.0.0"
-    p-queue: "npm:^8.0.1"
+    p-queue-compat: "npm:^1.0.227"
     p-throttle: "npm:^7.0.0"
     pino: "npm:^9.5.0"
     promise-based-task: "npm:^3.1.1"
@@ -3160,9 +3122,9 @@ __metadata:
     "@googleapis/customsearch": ^3.2.0
     "@grpc/grpc-js": ^1.11.3
     "@grpc/proto-loader": ^0.7.13
-    "@ibm-generative-ai/node-sdk": ~3.2.4
     "@langchain/community": ">=0.2.28"
     "@langchain/core": ">=0.2.27"
+    "@modelcontextprotocol/sdk": ^1.0.4
     "@zilliz/milvus2-sdk-node": ^2.4.9
     google-auth-library: "*"
     groq-sdk: ^0.7.0
@@ -3170,6 +3132,7 @@ __metadata:
     openai: ^4.67.3
     openai-chat-tokens: ^0.2.8
     sequelize: ^6.37.3
+    yaml: ^2.6.1
   peerDependenciesMeta:
     "@aws-sdk/client-bedrock-runtime":
       optional: true
@@ -3183,11 +3146,11 @@ __metadata:
       optional: true
     "@grpc/proto-loader":
       optional: true
-    "@ibm-generative-ai/node-sdk":
-      optional: true
     "@langchain/community":
       optional: true
     "@langchain/core":
+      optional: true
+    "@modelcontextprotocol/sdk":
       optional: true
     "@zilliz/milvus2-sdk-node":
       optional: true
@@ -3203,7 +3166,9 @@ __metadata:
       optional: true
     sequelize:
       optional: true
-  checksum: 10c0/fb4c3f0298be01ad005a9a63de14ab5929029487e7836a30550f6ec32f711a19b80ce7f4fe189de601c3bb3e1225bb0145a6c09efa8c59a05ad76c17683cb5f8
+    yaml:
+      optional: true
+  checksum: 10c0/dd0e329127d0dbb76360e333a2271bd8da422059f5c9434153983f8a3a3d8b8c1d07740e402b54d8a039592847ed441f8880c765c3a3fc53b6fbeb28839b8396
   languageName: node
   linkType: hard
 
@@ -3240,7 +3205,7 @@ __metadata:
     "@typescript-eslint/eslint-plugin": "npm:^7.13.0"
     "@typescript-eslint/parser": "npm:^7.13.0"
     "@vitest/coverage-v8": "npm:^1.6.0"
-    bee-agent-framework: "npm:^0.0.52"
+    bee-agent-framework: "npm:^0.0.57"
     bullmq: "npm:^5.8.2"
     dotenv: "npm:^16.4.5"
     dotenv-safe: "npm:^9.1.0"
@@ -3272,16 +3237,6 @@ __metadata:
     vitest: "npm:^2.1.3"
   languageName: unknown
   linkType: soft
-
-"bee-proto@npm:0.0.2":
-  version: 0.0.2
-  resolution: "bee-proto@npm:0.0.2"
-  dependencies:
-    "@bufbuild/protobuf": "npm:^1.10.0"
-    "@connectrpc/connect": "npm:^1.4.0"
-  checksum: 10c0/197a092b4a3e04c9c14853ad7f3122e10810186112c91a3911c666cb56bffa3bd1f172c5f4738b7371e8558b3b159944c9306b9042c58a01d4156eaf7594d0ac
-  languageName: node
-  linkType: hard
 
 "before-after-hook@npm:^2.2.0":
   version: 2.2.3
@@ -4439,13 +4394,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"duck-duck-scrape@npm:^2.2.6":
-  version: 2.2.6
-  resolution: "duck-duck-scrape@npm:2.2.6"
+"duck-duck-scrape@npm:^2.2.7":
+  version: 2.2.7
+  resolution: "duck-duck-scrape@npm:2.2.7"
   dependencies:
     html-entities: "npm:^2.3.3"
     needle: "npm:^3.2.0"
-  checksum: 10c0/f9e3e97bd333e0ddf6867da261a2383f89b20260953eb461e890d6f204290d8ca867f8333fffb4d7998a82a0666c13cae608975fb6deaf6ff771009b1a5c9bf7
+  checksum: 10c0/31107dc1821d74e7adf35304626203f9c67c204a357376b414f63ea9749ea168de3c48d99e016edfb071166e47a58438a47c563f937d46d79b0d5804a3bd05ee
   languageName: node
   linkType: hard
 
@@ -5125,7 +5080,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eventemitter3@npm:^5.0.1":
+"eventemitter3@npm:5.x, eventemitter3@npm:^5.0.1":
   version: 5.0.1
   resolution: "eventemitter3@npm:5.0.1"
   checksum: 10c0/4ba5c00c506e6c786b4d6262cfbce90ddc14c10d4667e5c83ae993c9de88aa856033994dd2b35b83e8dc1170e224e66a319fa80adc4c32adcd2379bbc75da814
@@ -8344,13 +8299,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"p-queue@npm:^8.0.1":
-  version: 8.0.1
-  resolution: "p-queue@npm:8.0.1"
+"p-queue-compat@npm:^1.0.227":
+  version: 1.0.228
+  resolution: "p-queue-compat@npm:1.0.228"
   dependencies:
-    eventemitter3: "npm:^5.0.1"
-    p-timeout: "npm:^6.1.2"
-  checksum: 10c0/fe185bc8bbd32d17a5f6dba090077b1bb326b008b4ec9b0646c57a32a6984035aa8ece909a6d0de7f6c4640296dc288197f430e7394cdc76a26d862339494616
+    eventemitter3: "npm:5.x"
+    p-timeout-compat: "npm:^1.0.3"
+  checksum: 10c0/8f7f128e70c3dfe0a5646c49b9302a6cf0234cdb9340a75758271ff81ee0402b2919fa79fb5be18e776e517994d89bb6a968c3d2ac3781fdf819a4a57a6ebbd5
   languageName: node
   linkType: hard
 
@@ -8361,10 +8316,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"p-timeout@npm:^6.1.2":
-  version: 6.1.3
-  resolution: "p-timeout@npm:6.1.3"
-  checksum: 10c0/6dcd1efc1a18afac08dd4f8e09797bbe635110e597d27026b478f884b867616871499427643a6b2e11f0404b2936d17db69da2b5e58d5fe99e1fac80a53f0250
+"p-timeout-compat@npm:^1.0.3":
+  version: 1.0.6
+  resolution: "p-timeout-compat@npm:1.0.6"
+  checksum: 10c0/8b53fdab64760c4635e57178df7386a61b7a0f05fe7c23e2fd1c8c14b18754eed6c9da175cea84e08b25951434a4a278bdfe8ca57137e751a7bed6e1c472b003
   languageName: node
   linkType: hard
 
@@ -10989,15 +10944,6 @@ __metadata:
   version: 6.19.8
   resolution: "undici-types@npm:6.19.8"
   checksum: 10c0/078afa5990fba110f6824823ace86073b4638f1d5112ee26e790155f481f2a868cc3e0615505b6f4282bdf74a3d8caad715fd809e870c2bb0704e3ea6082f344
-  languageName: node
-  linkType: hard
-
-"undici@npm:^5.28.4":
-  version: 5.28.4
-  resolution: "undici@npm:5.28.4"
-  dependencies:
-    "@fastify/busboy": "npm:^2.0.0"
-  checksum: 10c0/08d0f2596553aa0a54ca6e8e9c7f45aef7d042c60918564e3a142d449eda165a80196f6ef19ea2ef2e6446959e293095d8e40af1236f0d67223b06afac5ecad7
   languageName: node
   linkType: hard
 

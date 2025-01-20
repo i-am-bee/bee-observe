@@ -183,6 +183,7 @@ export async function generateTrace({ prompt }: { prompt: string }) {
           {
             attributes: {
               target: span.target,
+              traceId,
               name: span.name
             }
           },
