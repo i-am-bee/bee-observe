@@ -46,7 +46,7 @@ services:
       [
         'sh',
         '-c',
-        "while ! curl --silent --fail http://mlflow:8080; do echo 'Waiting for API...'; sleep 5; done"
+        "while ! curl --silent --fail http://mlflow:8080/health; do echo 'Waiting for Mlflow...'; sleep 5; done"
       ]
   otel-collector:
     image: otel/opentelemetry-collector-contrib:0.114.0
@@ -97,5 +97,5 @@ services:
       [
         'sh',
         '-c',
-        "while ! curl --silent --fail http://observe_api:4318/health; do echo 'Waiting for API...'; sleep 5; done"
+        "while ! curl --silent --fail http://observe_api:4319/health; do echo 'Waiting for API...'; sleep 5; done"
       ]

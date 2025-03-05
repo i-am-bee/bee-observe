@@ -22,7 +22,7 @@ processors:
   filter/observe:
     traces:
       span:
-        - instrumentation_scope.name != "bee-agent-framework"
+        - instrumentation_scope.name != "beeai-framework"
   memory_limiter:
     check_interval: 5s
     limit_percentage: 80

@@ -80,7 +80,7 @@ export const constants = Object.freeze({
     )
   }),
   OPENTELEMETRY: {
-    INSTRUMENTATION_SCOPE: 'bee-agent-framework'
+    INSTRUMENTATION_SCOPE: process.env.OPENTELEMETRY_INSTRUMENTATION_SCOPE || 'beeai-framework'
   },
   FRAMEWORK_BRAKING_CHANGES: {
     TRACE_ID_FOR_EACH_SPAN: '0.0.56'
