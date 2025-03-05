@@ -17,14 +17,14 @@
 import { setTimeout as setTimeoutPromise } from 'node:timers/promises';
 
 import { api } from '@opentelemetry/sdk-node';
-import { BeeAgent } from 'bee-agent-framework/agents/bee/agent';
-import { TokenMemory } from 'bee-agent-framework/memory/tokenMemory';
-import { DuckDuckGoSearchTool } from 'bee-agent-framework/tools/search/duckDuckGoSearch';
-import { WikipediaTool } from 'bee-agent-framework/tools/search/wikipedia';
-import { OpenMeteoTool } from 'bee-agent-framework/tools/weather/openMeteo';
-import { OllamaChatLLM } from 'bee-agent-framework/adapters/ollama/chat';
+import { BeeAgent } from 'beeai-framework/agents/bee/agent';
+import { TokenMemory } from 'beeai-framework/memory/tokenMemory';
+import { DuckDuckGoSearchTool } from 'beeai-framework/tools/search/duckDuckGoSearch';
+import { WikipediaTool } from 'beeai-framework/tools/search/wikipedia';
+import { OpenMeteoTool } from 'beeai-framework/tools/weather/openMeteo';
+import { OllamaChatModel } from 'beeai-framework/adapters/ollama/backend/chat';
 import protobuf from 'protobufjs';
-import { Version } from 'bee-agent-framework';
+import { Version } from 'beeai-framework';
 
 import { TraceDto } from '../trace/trace.dto.js';
 import { constants } from '../utils/constants.js';
@@ -102,13 +102,11 @@ export async function makeRequest<T>({
   });
 }
 
-const llm = new OllamaChatLLM({
-  modelId: 'llama3.1' // llama3.1:70b for better performance
-});
+const llm = new OllamaChatModel('llama3.1');
 
 export const agent = new BeeAgent({
   llm,
-  memory: new TokenMemory({ llm }),
+  memory: new TokenMemory(),
   tools: [
     new DuckDuckGoSearchTool(),
     new WikipediaTool(),
@@ -161,7 +159,7 @@ export async function generateTrace({ prompt }: { prompt: string }) {
 
   // 1) main span
   tracer.startActiveSpan(
-    `bee-agent-framework-BeeAgent-${traceId}`,
+    `beeai-framework-BeeAgent-${traceId}`,
     {
       attributes: {
         traceId,

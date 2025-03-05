@@ -15,10 +15,11 @@
  */
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { Version } from 'bee-agent-framework';
+import { Version } from 'beeai-framework';
 
 import { sdk, spanTraceExporterProcessor } from '../testing/telemetry.js';
 import { generateTrace, makeRequest, waitForTrace } from '../testing/utils.js';
+import { constants } from '../utils/constants.js';
 
 let traceId: string | undefined = undefined;
 const prompt = 'hello';
@@ -56,7 +57,8 @@ describe('span module', () => {
     expect(total_count).toBeGreaterThan(0);
 
     const mainSpan = results.find(
-      (result: any) => result.name === `bee-agent-framework-BeeAgent-${traceId}`
+      (result: any) =>
+        result.name === `${constants.OPENTELEMETRY.INSTRUMENTATION_SCOPE}-BeeAgent-${traceId}`
     );
 
     expect(mainSpan.attributes.traceId).toBe(traceId);
