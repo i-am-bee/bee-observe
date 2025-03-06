@@ -1,7 +1,7 @@
 {
   "name": "bee-observe",
   "packageManager": "yarn@4.3.1",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "author": "IBM Corp.",
   "contributors": [
     "Milan Gallas <milan.gallas@ibm.com>"
